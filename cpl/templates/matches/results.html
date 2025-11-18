@@ -1,0 +1,87 @@
+{% extends 'layouts/base.html' %}
+{% block title %}League | Results{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h4 m-0">Match Results</h1>
+  <a href="{{ url_for('matches.fixtures') }}" class="btn btn-outline-light btn-sm">View Fixtures</a>
+</div>
+
+<form class="row g-3 align-items-end mb-4" method="get">
+  <div class="col-12 col-md-3">
+    <label class="form-label small">Season</label>
+    <select class="form-select" name="season">
+      <option value="">All</option>
+      {% for s in seasons %}
+      <option value="{{ s }}" {% if selected_season==s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12 col-md-3">
+    <label class="form-label small">Team</label>
+    <select class="form-select" name="team">
+      <option value="">All teams</option>
+      {% for t in teams %}
+      <option value="{{ t.short_code }}" {% if selected_team==t.short_code %}selected{% endif %}>{{ t.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12 col-md-3">
+    <label class="form-label small">Venue</label>
+    <input type="text" class="form-control" name="venue" value="{{ selected_venue or '' }}" placeholder="Search venue">
+  </div>
+  <div class="col-12 col-md-3 d-flex gap-2">
+    <button type="submit" class="btn btn-primary">Apply</button>
+    <a href="{{ url_for('matches.results') }}" class="btn btn-secondary">Reset</a>
+  </div>
+</form>
+
+<section aria-labelledby="results-heading">
+  <h2 id="results-heading" class="visually-hidden">Results</h2>
+  <div class="row g-3 text-white">
+    {% for match in matches %}
+    {% set team_a = teams_dict.get(match.team_a_id) %}
+    {% set team_b = teams_dict.get(match.team_b_id) %}
+    <div class="col-12">
+      <a href="{{ url_for('matches.detail', match_id=match.id) }}" class="card p-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3 text-white">
+            {% if team_a %}
+              <img src="{{ team_a.logo_url }}" alt="{{ team_a.short_code }}" height="40" width="40">
+            {% endif %}
+            <div>
+              <div class="fw-semibold">
+                {{ team_a.short_code if team_a else "Team " ~ match.team_a_id }}
+                vs
+                {{ team_b.short_code if team_b else "Team " ~ match.team_b_id }}
+              </div>
+              <div class="small result-meta">{{ match.venue }} · {{ match.match_date.strftime('%d %b %Y') }}</div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge {% if match.status=='Completed' %}bg-success{% elif match.status=='No Result' %}bg-warning text-dark{% else %}bg-secondary{% endif %} result-status">{{ match.status }}</span>
+            <div class="text-end">
+              <div class="fw-semibold text-white">{{ match.result or 'Result pending' }}</div>
+              {% if match.score_summary %}
+              <div class="small result-meta">{{ match.score_summary }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <nav class="mt-4" aria-label="Results pagination">
+    <ul class="pagination">
+      {% if pagination.has_prev %}
+      <li class="page-item"><a class="page-link" href="?page={{ pagination.prev_num }}{% if selected_season %}&season={{ selected_season }}{% endif %}{% if selected_team %}&team={{ selected_team }}{% endif %}{% if selected_venue %}&venue={{ selected_venue }}{% endif %}">Previous</a></li>
+      {% endif %}
+      <li class="page-item disabled"><a class="page-link" href="#">{{ pagination.page }} / {{ pagination.pages }}</a></li>
+      {% if pagination.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ pagination.next_num }}{% if selected_season %}&season={{ selected_season }}{% endif %}{% if selected_team %}&team={{ selected_team }}{% endif %}{% if selected_venue %}&venue={{ selected_venue }}{% endif %}">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+</section>
+{% endblock %}

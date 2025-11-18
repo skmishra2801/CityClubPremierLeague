@@ -1,0 +1,43 @@
+{% extends "layouts/base.html" %}
+{% block title %}Teams{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h4 m-0">Teams</h1>
+  <a href="{{ url_for('teams.add_team') }}" class="btn btn-primary btn-sm">
+    + Add Team
+  </a>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {% if teams %}
+    {% for team in teams %}
+    <div class="col">
+      <div class="card h-100">
+        {% if team.logo_url %}
+        <img src="{{ team.logo_url }}" class="card-img-top" alt="{{ team.name }}">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ team.name }}</h5>
+          <p class="card-text mb-2">
+            <strong>Code:</strong> {{ team.short_code or "N/A" }}<br>
+            <strong>City:</strong> {{ team.city or "N/A" }}<br>
+            <strong>Coach:</strong> {{ team.coach or "N/A" }}
+          </p>
+          <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="btn btn-outline-secondary btn-sm">
+            View Team
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="col-12">
+      <div class="alert alert-info">
+        No teams found. Click "Add Team" to create one.
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

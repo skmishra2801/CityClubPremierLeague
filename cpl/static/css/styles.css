@@ -1,0 +1,9 @@
+/* ipl/static/css/styles.css */
+body { background: #0f0f12; color: #eaeaea; }
+.site-header { position: sticky; top: 0; z-index: 1000; }
+.card { background: #1a1a1f; border-color: #2a2a30; }
+.table { color: #eaeaea; }
+a { color: #9fd6ff; text-decoration: none; }
+a:hover { color: #c2e7ff; }
+.badge.bg-secondary { background-color: #444 !important; }
+.result-meta { color: #a6a6b2; }

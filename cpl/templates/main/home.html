@@ -1,0 +1,56 @@
+<!-- ipl/templates/main/home.html -->
+{% extends 'layouts/base.html' %}
+{% block title %}League | Home{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <h2 class="h5 mb-3">Latest Matches</h2>
+    <div class="list-group">
+      {% for m in matches %}
+      <a href="{{ url_for('matches.detail', match_id=m.id) }}" class="list-group-item list-group-item-action">
+        <div class="d-flex justify-content-between">
+            {% set team_a = teams.get(m.team_a_id) %}
+            {% set team_b = teams.get(m.team_b_id) %}
+            <strong>
+              {{ team_a.name if team_a else "Team " ~ m.team_a_id }}
+              vs
+              {{ team_b.name if team_b else "Team " ~ m.team_b_id }}
+            </strong>
+          <span class="badge bg-secondary">{{ m.status }}</span>
+        </div>
+        <div class="small text-muted">{{ m.venue }} — {{ m.match_date.strftime('%d %b %Y') }}</div>
+        {% if m.result %}<div class="small">{{ m.result }}</div>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+
+
+
+  <div class="col-12">
+    <h2 class="h5 mb-3">Points Table</h2>
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr><th>Team</th><th>M</th><th>W</th><th>L</th><th>T</th><th>NR</th><th>Pts</th><th>NRR</th></tr>
+        </thead>
+        <tbody>
+          {% for row in standings %}
+          <tr>
+            <td>{{ row.team.short_code }}</td>
+            <td>{{ row.matches }}</td>
+            <td>{{ row.wins }}</td>
+            <td>{{ row.losses }}</td>
+            <td>{{ row.ties }}</td>
+            <td>{{ row.nr }}</td>
+            <td>{{ row.points }}</td>
+            <td>{{ "%.3f"|format(row.nrr) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

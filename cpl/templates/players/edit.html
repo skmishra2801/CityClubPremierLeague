@@ -1,0 +1,56 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Edit Player{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1 class="h5 mb-4">Edit Player</h1>
+  <form method="post" enctype="multipart/form-data">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" value="{{ player.name }}" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Role</label>
+        <select name="role" class="form-select" required>
+          <option value="Batter" {% if player.role=="Batter" %}selected{% endif %}>Batter</option>
+          <option value="Bowler" {% if player.role=="Bowler" %}selected{% endif %}>Bowler</option>
+          <option value="All-rounder" {% if player.role=="All-rounder" %}selected{% endif %}>All-rounder</option>
+          <option value="WK" {% if player.role=="WK" %}selected{% endif %}>Wicket Keeper</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Jersey Number</label>
+        <input type="number" name="jersey_number" class="form-control" value="{{ player.jersey_number }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Jersey Size</label>
+        <select name="jersey_size" class="form-select">
+          <option value="S" {% if player.jersey_size=="S" %}selected{% endif %}>S</option>
+          <option value="M" {% if player.jersey_size=="M" %}selected{% endif %}>M</option>
+          <option value="L" {% if player.jersey_size=="L" %}selected{% endif %}>L</option>
+          <option value="XL" {% if player.jersey_size=="XL" %}selected{% endif %}>XL</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Payment Status</label>
+        <select name="payment_status" class="form-select">
+          <option value="Pending" {% if player.payment_status=="Pending" %}selected{% endif %}>Pending</option>
+          <option value="Paid" {% if player.payment_status=="Paid" %}selected{% endif %}>Paid</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Photo</label>
+        <input type="file" name="photo" class="form-control">
+        {% if player.photo_url %}
+          <img src="{{ player.photo_url }}" alt="{{ player.name }}" class="mt-2 rounded" style="height:60px;">
+        {% endif %}
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ url_for('players.list_players') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

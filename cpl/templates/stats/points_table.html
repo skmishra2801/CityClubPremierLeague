@@ -1,0 +1,65 @@
+{% extends 'layouts/base.html' %}
+{% block title %}League | Points Table{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1 class="h4 mb-3">Points Table</h1>
+
+  <form class="row g-3 align-items-end mb-4" method="get">
+    <div class="col-12 col-md-3">
+      <label class="form-label small">Season</label>
+      <select class="form-select" name="season">
+        <option value="">All</option>
+        {% for s in seasons %}
+        <option value="{{ s }}" {% if selected_season==s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3 d-flex gap-2">
+      <button type="submit" class="btn btn-primary">Apply</button>
+      <a href="{{ url_for('stats.points_table') }}" class="btn btn-secondary">Reset</a>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <thead>
+        <tr>
+          <th>Team</th>
+          <th>M</th>
+          <th>W</th>
+          <th>L</th>
+          <th>T</th>
+          <th>NR</th>
+          <th>Pts</th>
+          <th>NRR</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in standings %}
+        <tr>
+          <td>{{ row.team.short_code }}</td>
+          <td>{{ row.matches }}</td>
+          <td>{{ row.wins }}</td>
+          <td>{{ row.losses }}</td>
+          <td>{{ row.ties }}</td>
+          <td>{{ row.nr }}</td>
+          <td>{{ row.points }}</td>
+          <td>
+            {% if row.nrr %}
+              {{ "%+.2f"|format(row.nrr) }}
+            {% else %}
+              0.00
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center text-muted">No standings available</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

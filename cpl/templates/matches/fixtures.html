@@ -1,0 +1,58 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Fixtures{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h4 m-0">Match Fixtures</h1>
+  <a href="{{ url_for('matches.create_fixture') }}" class="btn btn-primary btn-sm">
+    + Create Fixture
+  </a>
+</div>
+
+<!-- Upcoming Matches -->
+<section class="mb-5">
+  <h2 class="h5 mb-3">Upcoming Matches</h2>
+  <div class="list-group">
+    {% for match in upcoming_matches %}
+    <a href="{{ url_for('matches.detail', match_id=match.id) }}" class="list-group-item list-group-item-action">
+      <div class="d-flex justify-content-between">
+        <strong>{{ teams[match.team_a_id].name }} vs {{ teams[match.team_b_id].name }}</strong>
+        <span class="badge bg-info">{{ match.status }}</span>
+      </div>
+      <div class="small text-muted d-flex justify-content-between">
+        <span>{{ match.venue }} — {{ match.match_date.strftime('%d %b %Y') }}</span>
+      </div>
+    </a>
+    {% else %}
+    <div class="alert alert-info">No upcoming matches scheduled.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Completed Matches -->
+<section>
+  <h2 class="h5 mb-3">Completed Matches</h2>
+  <div class="list-group">
+    {% for match in completed_matches %}
+    <a href="{{ url_for('matches.detail', match_id=match.id) }}" class="list-group-item list-group-item-action">
+      <div class="d-flex justify-content-between">
+        <strong>{{ teams[match.team_a_id].name }} vs {{ teams[match.team_b_id].name }}</strong>
+        <span class="badge bg-success">{{ match.status }}</span>
+      </div>
+      <div class="small text-muted">
+        {{ match.venue }} — {{ match.match_date.strftime('%d %b %Y') }}
+
+      </div>
+      {% if match.result %}
+      <div class="small  d-flex justify-content-between">
+        <span>{{ match.result }}</span>
+      </div>
+      {% endif %}
+    </a>
+    {% else %}
+    <div class="alert alert-warning">No completed matches yet.</div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+{% block title %}Match Detail{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h4 m-0">Match Detail</h1>
+  <a href="{{ url_for('matches.fixtures') }}" class="btn btn-secondary btn-sm">
+    ← Back to Fixtures
+  </a>
+</div>
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title text-white">
+      {% if teams %}
+      {{ teams[match.team_a_id].name }} vs {{ teams[match.team_b_id].name }}
+      {% else %}
+      Team {{ match.team_a_id }} vs Team {{ match.team_b_id }}
+      {% endif %}
+    </h5>
+    <p class="card-text text-white">
+      <strong>Venue:</strong> {{ match.venue or "TBD" }}<br>
+      <strong>Date:</strong> {{ match.match_date.strftime("%d %b %Y %I:%M %p") }}<br>
+      <strong>Status:</strong> {{ match.status }}<br>
+      {% if match.result %}
+      <strong class="text-white">Result:</strong> <span class="text-white"> {{ match.result }}</span><br>
+      {% endif %}
+      {% if match.score_summary %}
+      <strong>Score Summary:</strong> {{ match.score_summary }}
+      {% endif %}
+    </p>
+    <form action="{{ url_for('matches.complete_match', match_id=match.id) }}" method="POST" class="mt-3 text-white">
+      <div class="mb-2" >
+        <label class="form-label">Winner</label>
+        <select name="winner_team_id" class="form-select" required>
+          <option value="">-- Select Winner --</option>
+          <option value="{{ match.team_a_id }}">{{ match.team_a.name }}</option>
+          <option value="{{ match.team_b_id }}">{{ match.team_b.name }}</option>
+          <option value="tie">Tie</option>
+          <option value="nr">No Result</option>
+        </select>
+      </div>
+      <!-- Team A Score -->
+      <div class="mb-2">
+        <label class="form-label">{{ match.team_a.name }} Score</label>
+        <div class="input-group">
+          <input type="number" name="team_a_runs" class="form-control" placeholder="Runs" min="0" required>
+          <span class="input-group-text">/</span>
+          <input type="number" name="team_a_wickets" class="form-control" placeholder="Wickets" min="0" max="10" required>
+          <input type="text" name="team_a_overs" class="form-control" placeholder="Overs (e.g. 19.5)" required>
+        </div>
+      </div>
+      <!-- Team B Score -->
+      <div class="mb-2">
+        <label class="form-label">{{ match.team_b.name }} Score</label>
+        <div class="input-group">
+          <input type="number" name="team_b_runs" class="form-control" placeholder="Runs" min="0" required>
+          <span class="input-group-text">/</span>
+          <input type="number" name="team_b_wickets" class="form-control" placeholder="Wickets" min="0" max="10" required>
+          <input type="text" name="team_b_overs" class="form-control" placeholder="Overs (e.g. 20)" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-success">Mark as Completed</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

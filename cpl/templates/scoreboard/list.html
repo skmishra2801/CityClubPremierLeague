@@ -1,0 +1,24 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Scoreboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">Matches</h2>
+
+  {% for match in matches %}
+    {% set teamA, teamB = match.title.split('vs') %}
+    <div class="d-flex justify-content-between align-items-center border rounded p-3 mb-2">
+      <div>
+        <strong>{{ teamA.strip() }} vs {{ teamB.strip() }}</strong>
+        <br>
+        <small class="text-white">
+          ({{ match.team_a.name }} vs {{ match.team_b.name }})
+        </small>
+      </div>
+      <a href="{{ url_for('scoreboard.scoreboard', match_id=match.id) }}" class="btn btn-sm btn-info">
+        View Scoreboard
+      </a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

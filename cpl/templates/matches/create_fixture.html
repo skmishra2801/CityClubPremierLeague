@@ -1,0 +1,39 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Create Fixture{% endblock %}
+{% block content %}
+<h1 class="h4 mb-3">Create New Fixture</h1>
+<form method="POST" class="row g-3">
+  <div class="mb-3">
+    <label class="form-label">Season</label>
+    <input type="month" name="season" class="form-control" placeholder="e.g. 2025" required>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Team A</label>
+    <select name="team_a" class="form-select" required>
+      {% for team in teams %}
+      <option value="{{ team.id }}">{{ team.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Team B</label>
+    <select name="team_b" class="form-select" required>
+      {% for team in teams %}
+      <option value="{{ team.id }}">{{ team.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Venue</label>
+    <input type="text" name="venue" class="form-control" required>
+  </div>
+  <div class="col-md-6">
+    <label class="form-label">Match Date & Time</label>
+    <input type="datetime-local" name="match_date" class="form-control" required>
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">Create Fixture</button>
+    <a href="{{ url_for('matches.fixtures') }}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

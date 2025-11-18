@@ -1,0 +1,57 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Add Player{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1 class="h5 mb-4">Add New Player</h1>
+  <form method="post" enctype="multipart/form-data">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Role</label>
+        <select name="role" class="form-select" required>
+          <option value="">Select role</option>
+          <option value="Batter">Batter</option>
+          <option value="Bowler">Bowler</option>
+          <option value="All-rounder">All Rounder</option>
+          <option value="WK">Wicket Keeper</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Photo</label>
+        <input type="file" name="photo" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Jersey Number</label>
+        <input type="number" name="jersey_number" class="form-control">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Jersey Size</label>
+        <select name="jersey_size" class="form-select">
+          <option value="">Select size</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XL">XXL</option>
+          <option value="XL">XXXL</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Payment Status</label>
+        <select name="payment_status" class="form-select">
+          <option value="Pending">Pending</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Add Player</button>
+        <a href="{{ url_for('main.home') }}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

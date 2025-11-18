@@ -1,0 +1,42 @@
+{% extends 'layouts/base.html' %}
+{% block title %}{{ team.name }} | Team Details{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    {% if team.logo_url %}
+    <img src="{{ team.logo_url }}" alt="{{ team.short_code }}" class="rounded" style="height: 80px;">
+    {% endif %}
+    <div>
+      <h1 class="h4 mb-1">{{ team.name }} <small class="text-white">({{ team.short_code }})</small></h1>
+      <div class="small text-white">
+        {{ team.city }}{% if team.founded %} · Founded {{ team.founded }}{% endif %}{% if team.coach %} · Coach: {{ team.coach }}{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <h2 class="h5 mb-3">Players</h2>
+  {% if players %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+  {% for player in players %}
+  <div class="col">
+    <div class="card h-100 text-center bg-dark">
+      {% if player.photo_url %}
+        <img src="{{ player.photo_url }}" alt="{{ player.name }}" class="card-img-top" style="height:200px; object-fit:cover;">
+      {% else %}
+        <img src="{{ url_for('static', filename='image/default-player.png') }}" alt="No photo" class="card-img-top" style="height:200px; object-fit:cover;">
+      {% endif %}
+      <div class="card-body p-2">
+        <h6 class="card-title mb-1 text-white">{{ player.name }}</h6>
+        <p class="small mb-0 text-white">{{ player.role }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+  {% else %}
+  <p class="text-muted">No players assigned to this team yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

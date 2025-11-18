@@ -1,0 +1,18 @@
+<!-- ipl/templates/partials/navbar.html -->
+<header class="site-header border-bottom bg-dark">
+  <div class="container d-flex align-items-center justify-content-between py-2">
+    <a href="{{ url_for('main.home') }}" class="brand d-flex align-items-center text-decoration-none">
+      <img src="{{ url_for('static', filename='image/CPL Logo.png') }}" alt="League Logo" height="40" class="me-2">
+      <span class="text-white fw-bold">League</span>
+    </a>
+    <nav class="main-nav d-flex gap-3" aria-label="Main navigation">
+      <a class="text-white" href="{{ url_for('players.list_players') }}">Players</a>
+      <a class="text-white" href="{{ url_for('auction.auction_page') }}">Auction</a>
+      <a class="text-white" href="{{ url_for('matches.fixtures') }}">Fixtures</a>
+      <a class="text-white" href="{{ url_for('matches.results') }}">Results</a>
+      <a class="text-white" href="{{ url_for('stats.points_table') }}">Points Table</a>
+      <a class="text-white" href="{{ url_for('teams.list_teams') }}">Teams</a>
+      <a class="text-white" href="{{ url_for('scoreboard.scoreboard_page') }}">Scoreboard</a>
+    </nav>
+  </div>
+</header>
