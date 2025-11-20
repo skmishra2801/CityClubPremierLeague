@@ -1,56 +1,181 @@
-<!-- ipl/templates/main/home.html -->
-{% extends 'layouts/base.html' %}
-{% block title %}League | Home{% endblock %}
-{% block content %}
-<div class="row g-4">
-  <div class="col-lg-6">
-    <h2 class="h5 mb-3">Latest Matches</h2>
-    <div class="list-group">
-      {% for m in matches %}
-      <a href="{{ url_for('matches.detail', match_id=m.id) }}" class="list-group-item list-group-item-action">
-        <div class="d-flex justify-content-between">
-            {% set team_a = teams.get(m.team_a_id) %}
-            {% set team_b = teams.get(m.team_b_id) %}
-            <strong>
-              {{ team_a.name if team_a else "Team " ~ m.team_a_id }}
-              vs
-              {{ team_b.name if team_b else "Team " ~ m.team_b_id }}
-            </strong>
-          <span class="badge bg-secondary">{{ m.status }}</span>
-        </div>
-        <div class="small text-muted">{{ m.venue }} — {{ m.match_date.strftime('%d %b %Y') }}</div>
-        {% if m.result %}<div class="small">{{ m.result }}</div>{% endif %}
-      </a>
-      {% endfor %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>City Club Premier League | Home</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .team-card {
+      background: #fff;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .team-card .logo img {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+        .matches-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.matches-table thead {
+  background-color: #007bff; /* Blue header */
+  color: white;
+}
+
+.matches-table thead th {
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.matches-table tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f9f9f9;
+}
+
+.matches-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.matches-table tbody tr:hover td {
+  background-color: #eef6ff;
+}
+
+
+
+    </style>
+</head>
+<body>
+{% include "partials/navbar.html" %}
+<section class="teams-section container" id="teams">
+    <br>
+    <div class="teams-grid">
+        {% for team in teams.values() %}
+        <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="team-card"
+           style="border-top:4px solid #005daa">
+            <div class="logo">
+                <img src="{{ team.logo_url or url_for('static', filename='image/default.png') }}" alt="{{ team.name }}">
+            </div>
+            <div>
+                <div style="font-weight:700">{{ team.name }}</div>
+                <div style="color:var(--muted);font-size:13px">{{ team.short_code }}</div>
+            </div>
+        </a>
+        {% endfor %}
     </div>
-  </div>
+</section>
 
-
-
-
-  <div class="col-12">
-    <h2 class="h5 mb-3">Points Table</h2>
-    <div class="table-responsive">
-      <table class="table table-striped align-middle">
+<!--Auction Details-->
+<section class="teams-section container" id="auction">
+    <h2 style="margin:18px 0 12px;color:blue">Auction Details</h2>
+    <table class="matches-table" aria-describedby="auction">
         <thead>
-          <tr><th>Team</th><th>M</th><th>W</th><th>L</th><th>T</th><th>NR</th><th>Pts</th><th>NRR</th></tr>
+        <tr>
+            <th>Team</th>
+            <th>Opening Balance</th>
+            <th>Spent Amount</th>
+            <th>Available Balance</th>
+            <th>Max Players</th>
+            <th>No of Players</th>
+            <th>Risk Metric</th>
+        </tr>
         </thead>
         <tbody>
-          {% for row in standings %}
-          <tr>
-            <td>{{ row.team.short_code }}</td>
-            <td>{{ row.matches }}</td>
-            <td>{{ row.wins }}</td>
-            <td>{{ row.losses }}</td>
-            <td>{{ row.ties }}</td>
-            <td>{{ row.nr }}</td>
-            <td>{{ row.points }}</td>
-            <td>{{ "%.3f"|format(row.nrr) }}</td>
-          </tr>
-          {% endfor %}
+        {% for team in team_summary %}
+        <tr>
+            <td>{{ team.team }}</td>
+            <td>{{ team.openingbalance }}</td>
+            <td>{{ team.spentamount }}</td>
+            <td {% if team.balance
+            <= 200 %}style="color: red;"{% endif %}>{{ team.balance }}</td>
+            <td>{{team.maxplayers}}</td>
+            <td>{{ team.players }}</td>
+            <td {% if team[
+            'calculate'] is not none and team['calculate'] < 200 %}style="color:red;"{% endif %}>
+            {% if team['calculate'] is not none %}
+            {{ "%.2f"|format(team['calculate']) }}
+            {% else %}
+            N/A
+            {% endif %}
+            </td>
+
+
+        </tr>
+        {% endfor %}
         </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-{% endblock %}
+    </table>
+</section>
+<!--Leader Board-->
+<section class="teams-section container" id="leaderboard">
+    <h2 style="margin:18px 0 12px;color:blue">Leader Board</h2>
+    <table class="matches-table" aria-describedby="leaderboard">
+        <thead>
+        <tr>
+            <th>POS</th>
+            <th>TEAM</th>
+            <th>P</th>
+            <th>W</th>
+            <th>L</th>
+            <th>PTS</th>
+            <th>RECENT FORM</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for t in leaderboard %}
+        <tr>
+            <td>{{ t.POS }}</td>
+            <td>{{ t.team }}</td>
+            <td>{{ t.P }}</td>
+            <td>{{ t.W }}</td>
+            <td>{{ t.L }}</td>
+            <td>{{ t.PTS }}</td>
+            <td>
+                {% for result in t.recent_form.split() %}
+                <span style="
+                        display: inline-block;
+                        width: 22px;
+                        height: 22px;
+                        line-height: 22px;
+                        text-align: center;
+                        margin: 2px;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        color: white;
+                        background-color:
+                        {% if result == 'W' %}#28a745{% elif result == 'L' %}#dc3545{% else %}#6c757d{% endif %};">
+                    {{ result }}
+                </span>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

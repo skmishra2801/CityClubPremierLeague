@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
-from cpl.models import Team, Match, PointsTable
+from cpl.models import Team, Match, PointsTable, TeamBalance
 from extensions import db
+import cloudinary.uploader
 
 bp = Blueprint("teams", __name__, url_prefix="/teams")
 
@@ -29,9 +30,22 @@ def add_team():
         short_code = request.form["short_code"]
         city = request.form.get("city")
         coach = request.form.get("coach")
-        logo_url = request.form.get("logo_url")
 
-        new_team = Team(name=name, short_code=short_code, city=city, coach=coach, logo_url=logo_url)
+        logo_url = None
+        if "logo_file" in request.files:
+            file = request.files["logo_file"]
+            if file:
+                # Upload to Cloudinary
+                upload_result = cloudinary.uploader.upload(file)
+                logo_url = upload_result["secure_url"]  # hosted URL
+
+        new_team = Team(
+            name=name,
+            short_code=short_code,
+            city=city,
+            coach=coach,
+            logo_url=logo_url
+        )
         db.session.add(new_team)
         db.session.commit()
 
@@ -83,3 +97,38 @@ def results():
         selected_team=selected_team,
         selected_venue=selected_venue
     )
+
+
+@bp.route("/init_balances", methods=["GET", "POST"])
+def init_balances():
+    if request.method == "POST":
+        opening_amount = float(request.form.get("opening_amount", 0))
+        max_players = int(request.form.get("max_players", 25))  # optional field
+
+        teams = Team.query.all()
+        created = 0
+
+        for team in teams:
+            balance = TeamBalance.query.filter_by(team_id=team.id).first()
+            if not balance:
+                balance = TeamBalance(
+                    team_id=team.id,
+                    opening=opening_amount,
+                    spent=0,
+                    remaining=opening_amount,
+                    max_players=max_players,
+                    players_bought=0
+                )
+                db.session.add(balance)
+                created += 1
+            else:
+                # If balance already exists, update opening & remaining
+                balance.opening = opening_amount
+                balance.remaining = opening_amount - (balance.spent or 0)
+
+        db.session.commit()
+        flash(f"Initialized/updated balances for {created} teams!", "success")
+        return redirect(url_for("main.home"))
+
+    # GET request → show form
+    return render_template("teams/init_balances.html")

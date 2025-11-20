@@ -10,6 +10,7 @@
   <div class="col-md-6">
     <label class="form-label">Team A</label>
     <select name="team_a" class="form-select" required>
+      <option value="">----Select-----</option>
       {% for team in teams %}
       <option value="{{ team.id }}">{{ team.name }}</option>
       {% endfor %}
@@ -18,6 +19,7 @@
   <div class="col-md-6">
     <label class="form-label">Team B</label>
     <select name="team_b" class="form-select" required>
+      <option value="">----Select-----</option>
       {% for team in teams %}
       <option value="{{ team.id }}">{{ team.name }}</option>
       {% endfor %}
@@ -25,7 +27,11 @@
   </div>
   <div class="col-md-6">
     <label class="form-label">Venue</label>
-    <input type="text" name="venue" class="form-control" required>
+    <select name="venue" class="form-select" required>
+      <option value="">----Select-----</option>
+      <option value="Banadurga">Banadurga</option>
+      <option value="Airport">Airport</option>
+    </select>
   </div>
   <div class="col-md-6">
     <label class="form-label">Match Date & Time</label>

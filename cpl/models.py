@@ -15,7 +15,22 @@ class Team(db.Model):
     players = db.relationship("Player", back_populates="team", lazy=True)
     points_rows = db.relationship("PointsTable", back_populates="team", lazy=True)
     # Matches backrefs will be created automatically from Match relationships
+    balance = db.relationship("TeamBalance", back_populates="team", uselist=False)
+    # one balance row per team
 
+class TeamBalance(db.Model):
+    __tablename__ = "teambalance"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    team_id = db.Column(db.Integer, db.ForeignKey("team.id"), unique=True, nullable=False)
+    opening = db.Column(db.Numeric(12, 2), nullable=False)
+    spent = db.Column(db.Numeric(12, 2), default=0)
+    remaining = db.Column(db.Numeric(12, 2), default=0)
+    max_players = db.Column(db.Integer, default=0)
+    players_bought = db.Column(db.Integer, default=0)
+
+    # Relationship back to Team
+    team = db.relationship("Team", back_populates="balance")
 
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -28,6 +43,8 @@ class Player(db.Model):
     team_id = db.Column(db.Integer, db.ForeignKey("team.id"), nullable=True)
 
     team = db.relationship("Team", back_populates="players")
+
+
 
 
 class Match(db.Model):

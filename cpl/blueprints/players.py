@@ -29,6 +29,7 @@ def add_player():
             upload_result = cloudinary.uploader.upload(photo_file)
             photo_url = upload_result.get("secure_url")
 
+
         new_player = Player(
             name=name,
             role=role,

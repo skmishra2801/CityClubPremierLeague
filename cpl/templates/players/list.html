@@ -1,62 +1,73 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body {
+    padding-top: 100px; /* offset for fixed navbar + button */
+  }
+  .fixed-add-btn {
+    position: fixed;
+    top: 70px; /* adjust based on navbar height */
+    right: 20px;
+    z-index: 1030; /* keep above table */
+  }
+</style>
 {% extends 'layouts/base.html' %}
 {% block title %}Players{% endblock %}
 
 {% block content %}
 <div class="container my-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h5">Players</h1>
-    <a href="{{ url_for('players.add_player') }}" class="btn btn-sm btn-primary">Add Player</a>
-  </div>
-  <div class="table-responsive">
-    <table class="table table-striped align-middle">
-      <thead>
-  <tr>
+    <a href="{{ url_for('players.add_player') }}" class="btn btn-sm btn-primary fixed-add-btn">Add Player</a>
+    <div class="table-responsive mt-5">
+        <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Team</th>
+                <th>Jersey #</th>
+                <th>Size</th>
+                <th>Payment</th>
+                <th>Photo</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for p in players %}
+            <tr>
 
-    <th>Name</th>
-    <th>Role</th>
-    <th>Team</th>
-    <th>Jersey #</th>
-    <th>Size</th>
-    <th>Payment</th>
-    <th>Photo</th>
-    <th>Actions</th>
-  </tr>
-</thead>
-<tbody>
-  {% for p in players %}
-  <tr>
+                <td>{{ p.name }}</td>
+                <td>{{ p.role }}</td>
+                <td>{{ teams[p.team_id].short_code if p.team_id in teams else 'Unassigned' }}</td>
+                <td>{{ p.jersey_number or '-' }}</td>
+                <td>{{ p.jersey_size or '-' }}</td>
+                <td>
+                  <span class="badge {% if p.payment_status == 'Paid' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                    {{ p.payment_status or 'Pending' }}
+                  </span>
+                </td>
+                <td>
+                    {% if p.photo_url %}
+                    <img src="{{ p.photo_url }}" alt="{{ p.name }}" class="rounded" style="height:40px;">
+                    {% else %}
+                    <span class="text-muted">No photo</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('players.edit_player', player_id=p.id) }}"
+                       class="btn btn-sm btn-outline-primary">Edit</a>
+                    <form action="{{ url_for('players.delete_player', player_id=p.id) }}" method="post"
+                          class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Are you sure you want to delete {{ p.name }}?');">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
 
-    <td>{{ p.name }}</td>
-    <td>{{ p.role }}</td>
-    <td>{{ teams[p.team_id].short_code if p.team_id in teams else 'Unassigned' }}</td>
-    <td>{{ p.jersey_number or '-' }}</td>
-    <td>{{ p.jersey_size or '-' }}</td>
-    <td>
-      <span class="badge {% if p.payment_status == 'Paid' %}bg-success{% else %}bg-warning text-dark{% endif %}">
-        {{ p.payment_status or 'Pending' }}
-      </span>
-    </td>
-    <td>
-      {% if p.photo_url %}
-        <img src="{{ p.photo_url }}" alt="{{ p.name }}" class="rounded" style="height:40px;">
-      {% else %}
-        <span class="text-muted">No photo</span>
-      {% endif %}
-    </td>
-    <td>
-            <a href="{{ url_for('players.edit_player', player_id=p.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-            <form action="{{ url_for('players.delete_player', player_id=p.id) }}" method="post" class="d-inline">
-              <button type="submit" class="btn btn-sm btn-outline-danger"
-                      onclick="return confirm('Are you sure you want to delete {{ p.name }}?');">
-                Delete
-              </button>
-            </form>
-          </td>
-  </tr>
-  {% endfor %}
-</tbody>
-
-    </table>
-  </div>
+        </table>
+    </div>
 </div>
 {% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,3 +1,5 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
 {% extends 'layouts/base.html' %}
 {% block title %}League | Results{% endblock %}
 {% block content %}
@@ -49,12 +51,12 @@
               <img src="{{ team_a.logo_url }}" alt="{{ team_a.short_code }}" height="40" width="40">
             {% endif %}
             <div>
-              <div class="fw-semibold">
+              <div class="fw-semibold text-dark">
                 {{ team_a.short_code if team_a else "Team " ~ match.team_a_id }}
                 vs
                 {{ team_b.short_code if team_b else "Team " ~ match.team_b_id }}
               </div>
-              <div class="small result-meta">{{ match.venue }} · {{ match.match_date.strftime('%d %b %Y') }}</div>
+              <div class="small result-meta text-dark">{{ match.venue }} · {{ match.match_date.strftime('%d %b %Y') }}</div>
             </div>
           </div>
           <div class="d-flex align-items-center gap-3">
@@ -62,7 +64,7 @@
             <div class="text-end">
               <div class="fw-semibold text-white">{{ match.result or 'Result pending' }}</div>
               {% if match.score_summary %}
-              <div class="small result-meta">{{ match.score_summary }}</div>
+              <div class="small result-meta text-dark">{{ match.score_summary }}</div>
               {% endif %}
             </div>
           </div>
