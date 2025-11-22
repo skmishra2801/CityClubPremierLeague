@@ -1,7 +1,7 @@
 # ipl/blueprints/main.py
 from decimal import Decimal
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session
 from cpl.models import Match, PointsTable, Team, TeamBalance, Player
 from extensions import db
 
@@ -64,9 +64,16 @@ def home():
         spent = balance.spent if balance else Decimal("0")
         remaining = balance.remaining if balance else (opening - spent)
 
-        max_players = balance.max_players or 0
-        players_bought = balance.players_bought or 0
-        players_left = max_players - players_bought
+        # max_players = balance.max_players or 0
+        if balance:
+            max_players = balance.max_players or 0
+            players_bought = balance.players_bought or 0
+            players_left = max_players - players_bought
+        else:
+            max_players = 0
+            players_bought = 0
+            players_left = 0
+
 
         # ✅ Risk metric: remaining / players_left
         calculate = None
@@ -85,4 +92,4 @@ def home():
 
 
 
-    return render_template("main/home.html", matches=latest_matches, standings=standings, teams=teams, team_summary=team_summary, leaderboard=leaderboard)
+    return render_template("main/home.html", matches=latest_matches, standings=standings, teams=teams, team_summary=team_summary, leaderboard=leaderboard, is_admin=session.get("is_admin"))

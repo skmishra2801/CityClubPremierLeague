@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+
+from cpl.blueprints.admin import admin_required
 from cpl.models import Player, Team
 from extensions import db
 import cloudinary.uploader
@@ -50,6 +52,7 @@ def add_player():
 
 
 @bp.route("/edit/<int:player_id>", methods=["GET", "POST"])
+@admin_required
 def edit_player(player_id):
     player = Player.query.get_or_404(player_id)
     if request.method == "POST":
@@ -75,6 +78,7 @@ def edit_player(player_id):
 
 
 @bp.route("/delete/<int:player_id>", methods=["POST"])
+@admin_required
 def delete_player(player_id):
     player = Player.query.get_or_404(player_id)
     db.session.delete(player)

@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+
+from cpl.blueprints.admin import admin_required
 from cpl.models import Team, Match, PointsTable, TeamBalance
 from extensions import db
 import cloudinary.uploader
@@ -24,6 +26,7 @@ def team_detail(team_id):
 
 
 @bp.route("/add", methods=["GET", "POST"])
+@admin_required
 def add_team():
     if request.method == "POST":
         name = request.form["name"]
@@ -100,6 +103,7 @@ def results():
 
 
 @bp.route("/init_balances", methods=["GET", "POST"])
+@admin_required
 def init_balances():
     if request.method == "POST":
         opening_amount = float(request.form.get("opening_amount", 0))

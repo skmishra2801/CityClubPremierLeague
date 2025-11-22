@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
+
+from cpl.blueprints.admin import admin_required
 from cpl.models import Player, Team, TeamBalance
 from extensions import db
 from decimal import Decimal
@@ -11,6 +13,7 @@ from decimal import Decimal
 from decimal import Decimal
 
 @bp.route("/", methods=["GET", "POST"])
+@admin_required
 def auction_page():
     players = Player.query.all()
     teams = Team.query.all()

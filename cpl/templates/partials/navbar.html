@@ -44,11 +44,44 @@
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('teams.list_teams') }}">Teams</a></li>
                 <li class="nav-item"><a class="nav-link"
                                         href="{{ url_for('scoreboard.scoreboard_page') }}">Scoreboard</a></li>
-                <li>
-                    <a href="{{ url_for('teams.init_balances') }}" class="btn btn-warning">
+<!--                <li>-->
+<!--                    <a href="{{ url_for('teams.init_balances') }}" class="btn btn-warning">-->
+<!--                        Initialize Team Balances-->
+<!--                    </a>-->
+<!--                </li>-->
+                <!-- Example of admin-only public button (only admin sees this) -->
+                {% if session.get('is_admin') %}
+                <li class="nav-item">
+                    <a href="{{ url_for('teams.init_balances') }}" class="btn btn-warning ms-2">
                         Initialize Team Balances
                     </a>
                 </li>
+                {% endif %}
+
+                <!-- ADMIN SECTION -->
+                {% if session.get('is_admin') %}
+                    <!-- Show these ONLY when admin is logged in -->
+                    <li class="nav-item ms-3">
+                        <a class="nav-link text-warning fw-bold" href="{{ url_for('admin.login') }}">
+                            Admin Panel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger fw-bold" href="{{ url_for('admin.logout') }}">
+                            Logout
+                        </a>
+                    </li>
+
+                {% else %}
+                    <!-- Show this ONLY when admin NOT logged in -->
+                    <li class="nav-item ms-3">
+                        <a class="nav-link text-info fw-bold" href="{{ url_for('admin.login') }}">
+                            Admin Login
+                        </a>
+                    </li>
+                {% endif %}
+
+            </ul>
             </ul>
         </div>
     </div>

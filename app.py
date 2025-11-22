@@ -14,6 +14,7 @@ from cpl.blueprints.auction import bp as auction_bp
 from cpl.blueprints.scoreboard import bp as scoreboard_bp
 
 
+
 def create_app():
     app = Flask(__name__, static_folder="cpl/static", template_folder="cpl/templates")
     app.config.from_object(Config)
@@ -24,10 +25,11 @@ def create_app():
     app.register_blueprint(matches_bp, url_prefix="/matches")
     app.register_blueprint(teams_bp, url_prefix="/teams")
     app.register_blueprint(stats_bp, url_prefix="/stats")
-    app.register_blueprint(admin_bp, url_prefix="/admin")
+    # app.register_blueprint(admin_bp, url_prefix="/admin")
     app.register_blueprint(players_bp, url_prefix="/players")
     app.register_blueprint(auction_bp, url_prefix="/auction")
     app.register_blueprint(scoreboard_bp, url_prefix="/scoreboard")
+    app.register_blueprint(admin_bp)
 
     # Create tables
     with app.app_context():

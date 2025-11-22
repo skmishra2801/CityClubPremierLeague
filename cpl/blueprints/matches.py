@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
+
+from cpl.blueprints.admin import admin_required
 from cpl.models import Match, Team, PointsTable
 from datetime import datetime
 
@@ -78,6 +80,7 @@ def detail(match_id):
 
 # Create fixture form
 @bp.route("/create", methods=["GET", "POST"])
+@admin_required
 def create_fixture():
     if request.method == "POST":
         team_a_id = request.form["team_a"]
@@ -104,6 +107,7 @@ def create_fixture():
 
 
 @bp.route("/complete/<int:match_id>", methods=["POST"])
+@admin_required
 def complete_match(match_id):
     match = Match.query.get_or_404(match_id)
     winner_team_id = request.form.get("winner_team_id")

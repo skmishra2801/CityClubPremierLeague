@@ -1,5 +1,11 @@
 from datetime import datetime, timezone
 from extensions import db
+from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
+import enum
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Team(db.Model):
@@ -81,3 +87,55 @@ class PointsTable(db.Model):
     nrr = db.Column(db.Float, default=0.0)
 
     team = db.relationship("Team", back_populates="points_rows")
+
+
+
+
+# Define roles as an Enum for clarity
+class RoleEnum(enum.Enum):
+    admin = "admin"
+    editor = "editor"
+    viewer = "viewer"
+
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(120), unique=True, nullable=False)
+    password_hash = Column(String(128), nullable=False)
+    role = Column(Enum(RoleEnum), default=RoleEnum.viewer, nullable=False)
+
+    # Example: relationship to posts/images/etc.
+    # posts = relationship("Post", back_populates="author")
+
+    def set_password(self, password):
+        """Hash and store password securely."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Verify password against stored hash."""
+        return check_password_hash(self.password_hash, password)
+
+    def is_admin(self):
+        return self.role == RoleEnum.admin
+
+    def can_edit(self):
+        return self.role in [RoleEnum.admin, RoleEnum.editor]
+
+    def can_view(self):
+        return True  # all roles can view
+
+
+
+
+class Admin(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)

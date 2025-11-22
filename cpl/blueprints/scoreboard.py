@@ -142,40 +142,6 @@ def scoreboard(match_id):
         players_teamA=players_teamA,
         players_teamB=players_teamB
     )
-# @bp.route('/scoreboard/<int:match_id>')
-# def scoreboard(match_id):
-#     teamA, teamB = get_teams_from_match_schedule(match_id)
-#     if not teamA or not teamB:
-#         flash("⚠️ Could not find teams for this match.", "danger")
-#         return redirect(url_for('matches.fixtures'))
-#
-#     players_teamA = get_players_by_team(teamA)
-#     players_teamB = get_players_by_team(teamB)
-#
-#     if match_id not in match_store:
-#         match_store[match_id] = {
-#             "id": match_id,
-#             "innings": Innings(batting_team=teamA, bowling_team=teamB),
-#             "overs_limit": 20
-#         }
-#         inns = match_store[match_id]["innings"]
-#         # set striker/non-striker and bowler as before...
-#
-#     match_data = match_store[match_id]
-#     inns = match_data["innings"]
-#     batsmen = list(inns.batsmen.values())
-#     bowlers = list(inns.bowlers.values())
-#
-#     return render_template(
-#         "scoreboard/scoreboard.html",
-#         match=match_data,
-#         inns=inns,
-#         batsmen=batsmen,
-#         bowlers=bowlers,
-#         players_teamA=players_teamA,
-#         players_teamB=players_teamB
-#     )
-
 
 @bp.route("/update_ball", methods=["POST"])
 def update_ball():
