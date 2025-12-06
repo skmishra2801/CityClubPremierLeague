@@ -2,159 +2,697 @@
 {% block title %}Scoreboard{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/score.css') }}">
-  <div class="container">
-    <header class="header">
-      <div class="teams">
-        <h1>{{ inns.batting_team }} vs {{ inns.bowling_team }}</h1>
-        <p class="score">Score: <strong>{{ inns.total }}/{{ inns.wickets }}</strong> ({{ inns.overs }})</p>
-      </div>
-      <div class="context">
-        <p><strong>On strike:</strong> {{ inns.on_strike }} | <strong>Non-striker:</strong> {{ inns.non_strike }}</p>
-        <p><strong>Bowler:</strong> {{ inns.current_bowler }}</p>
-      </div>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/bootstrap-5.3.3.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/dataTables.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/font-awesome.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/ipl-style.min.css') }}">
+<style>
+    .scoreCardContentWrap { display: none; }
+    .scoreCardContentWrap.active { display: block; }
+    .ap-inner-tb-click.active {
+      background-color: #d32f2f;
+      color: #fff;
+    }
+    .form-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-top: 1rem;
+    }
+    .form-grid div {
+      display: flex;
+      flex-direction: column;
+      min-width: 120px;
+    }
+    .form-grid label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #333;
+    }
+    .form-grid input[type="number"],
+    .form-grid input[type="text"] {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .form-grid button {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .form-grid button:hover {
+      background-color: #0056b3;
+    }
+    #pink-scorecard-a, #pink-scorecard-b {
+      background-color: pink;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .star {
+      color: gold;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+    .striker-star { color: gold; margin-left:6px; }
+    .non-striker { color: #666; font-size:0.9em; margin-left:6px;}
+</style>
 
-    </header>
+<div class="MyApp">
+    <div class="ap-outer-tb-wrp tab-w-con mb-3">
+        <a href="{{ url_for('scoreboard.scoreboard', match_id=match.id, selected_tab='team_a') }}"
+           class="ap-inner-tb-click {% if selected_tab == 'team_a' %}active{% endif %}"
+           data-target="team_a">
+            {{ team_a_name }} <span class="mob-hide">Innings</span>
+        </a>
+        <a href="{{ url_for('scoreboard.scoreboard', match_id=match.id, selected_tab='team_b') }}"
+           class="ap-inner-tb-click {% if selected_tab == 'team_b' %}active{% endif %}"
+           data-target="team_b">
+            {{ team_b_name }} <span class="mob-hide">Innings</span>
+        </a>
+    </div>
 
-    <section class="grid">
-      <div class="card">
-        <h2>Batting</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Batsman</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th><th>Status</th>
-            </tr>
-          </thead>
-          <tbody class="text-white">
-            {% for b in batsmen %}
-            <tr class="{% if inns.on_strike == b.name %}strike{% elif inns.non_strike == b.name %}nonstrike{% endif %}">
-              <td>{{ b.name }}</td>
-              <td>{{ b.runs }}</td>
-              <td>{{ b.balls }}</td>
-              <td>{{ b.fours }}</td>
-              <td>{{ b.sixes }}</td>
-              <td>{{ b.strike_rate }}</td>
-              <td>{{ b.out_desc if b.out_desc else 'not out' }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <!-- First Innings   -->
+    <div id="team_a" class="scoreCardContentWrap ng-scope {% if selected_tab == 'team_a' %}active{% endif %}">
+        <div class="inline-forms d-flex justify-content-between align-items-start" style="gap:20px;">
+            <!-- Striker dropdown -->
+            <form method="post" action="{{ url_for('scoreboard.set_striker') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_a">
+                <input type="hidden" name="innings_no" value="{{ current_innings }}">
 
-      <div class="card">
-        <h2>Bowling</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Econ</th>
-            </tr>
-          </thead>
-          <tbody class="text-white">
-            {% for bw in bowlers %}
-            <tr class="{% if inns.current_bowler == bw.name %}current{% endif %}">
-              <td>{{ bw.name }}</td>
-              <td>{{ bw.overs }}</td>
-              <td>{{ bw.maidens }}</td>
-              <td>{{ bw.runs_conceded }}</td>
-              <td>{{ bw.wickets }}</td>
-              <td>{{ bw.economy }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
 
-      <div class="card">
-        <h2>Over timeline</h2>
-        <div class="overs">
-          {% for over_idx, events in inns.over_events.items() %}
-            <div class="over">
-              <div class="over-title">Over {{ over_idx }}</div>
-              <div class="balls">
-                {% for ev in events %}
-                  <span class="ball {{ 'wicket' if ev.wicket else '' }}">
-                    {{ ev.desc }}
-                  </span>
+                <label>Striker</label>
+                <select name="player_id" class="form-control mr-2">
+                    <option disabled selected>Select</option>
+                    {% for ps in players_teamA %}
+                    <option value="{{ ps.player.id }}">{{ ps.player.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="btn btn-primary">Set</button>
+            </form>
+
+            <!-- Non-striker dropdown -->
+            <form method="post" action="{{ url_for('scoreboard.set_non_striker') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_a">
+                <input type="hidden" name="innings_no" value="{{ current_innings }}">
+
+
+                <label>Non-Striker</label>
+                <select name="player_id" class="form-control mr-2">
+                    <option disabled selected>Select</option>
+                    {% for ps in players_teamA %}
+                    <option value="{{ ps.player.id }}">{{ ps.player.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-secondary">Set</button>
+            </form>
+
+            <!-- Bowler dropdown -->
+            <form method="post" action="{{ url_for('scoreboard.set_bowler') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_a">
+                <input type="hidden" name="innings_no" value="{{ current_innings }}">
+
+
+                <label>Bowler</label>
+                <select name="player_id" class="form-control mr-2">
+                    <option disabled selected>Select</option>
+                    {% for ps in players_teamB %}
+                    <option value="{{ ps.player.id }}">{{ ps.player.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-info">Set</button>
+            </form>
+
+            <!-- Set Over -->
+            <form method="post" action="{{ url_for('scoreboard.set_overs_limit') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_a">
+
+                <label for="overs_limit">Overs Limit</label>
+                <input type="number" id="overs_limit" name="overs_limit"
+                       class="form-control mr-2"
+                       min="1" max="50"
+                       value="{{ match.overs_limit or '' }}"
+                       placeholder="Enter overs">
+
+                <button type="submit" class="btn btn-success">Set Overs</button>
+            </form>
+        </div>
+
+        <div class="scoreCardContentHead">
+            <span class="sh_teamdet sh_teamdetL">
+                <span class="sh_teamLogo">
+                    <img src="{{ team_a_pic }}" alt="{{ team_a_name }}">
+                </span>
+                <span class="sh_teamName mob-hide">{{ team_a_name }}</span>
+                <span class="sh_teamName mob-show">{{ team_a_name }}</span>
+            </span>
+            <span class="sh_teamScoredet ng-scope">
+                <span class="sh_teamScore_Overs">Overs ({{ first_innings.overs }}) </span>
+                <span class="sh_teamScore_runs">{{ first_innings.runs  }}/{{ first_innings.wickets  }}</span>
+            </span>
+        </div>
+
+        <!-- Scoreboard-->
+        <div class="ap-scorecard-outer col-100 floatLft mb-4">
+            <table class="ap-scoreboard-table table-striped" width="100%" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr class="ap-head-row" style="background: #1b3e8a;color:#fff">
+                    <th class="textLeft">Batter</th>
+                    <th class="mobile-hide"></th>
+                    <th class="textCenter">R</th>
+                    <th class="textCenter">B</th>
+                    <th class="textCenter">4s</th>
+                    <th class="textCenter">6s</th>
+                    <th class="textCenter">SR</th>
+                </tr>
+                </thead>
+                <tbody class="team1">
+                {% for item in batting_scores_1 %}
+                <tr class="ng-scope">
+                    <td>
+                        <div class="ap-bats-score-name">
+                            <a href="javascript:void(0);" class="">
+                                <img class="ng-scope" title="{{ item.player.name }}"
+                                     src="{{ item.player.photo_url or 'default-player.png' }}">
+                                <span class="ng-binding">
+                                    {{ item.player.name }}
+                                    {% if item.player.id == match.current_on_strike_id %}
+                                        <span class="striker-star">★</span>
+                                    {% elif item.player.id == match.current_non_strike_id %}
+                                        <span class="non-striker">(ns)</span>
+                                    {% endif %}
+                                </span>
+                                <span class="dismissalSmall ng-binding">{{ item.dismissal_desc or '' }}</span>
+                            </a>
+                        </div>
+                    </td>
+                    <td class="mobile-hide op5 ng-binding">{{ item.dismissal_desc or '' }}</td>
+                    <td class="textCenter ng-binding">{{ item.batting_runs }}</td>
+                    <td class="textCenter op5 ng-binding">{{ item.balls_faced }}</td>
+                    <td class="textCenter op5 ng-binding">{{ item.fours }}</td>
+                    <td class="textCenter op5 ng-binding">{{ item.sixes }}</td>
+                    <td class="textCenter op5 ng-binding">
+                        {% if item.balls_faced %}
+                            {{ "%.2f"|format((item.batting_runs / item.balls_faced) * 100) }}
+                        {% else %}
+                            0.00
+                        {% endif %}
+                    </td>
+                </tr>
                 {% endfor %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <h2>Update ball</h2>
-      <form method="post" action="{{ url_for('scoreboard.update_ball') }}" class="form-grid">
-        <input type="hidden" name="match_id" value="{{ match.id }}">
-        <div>
-          <label class="text-white">Runs (bat)</label>
-          <input type="number" name="runs_bat" min="0" max="6" value="0">
+                <tr class="sc-extra-wrap">
+                    <td>
+                        <div class="ap-bats-score-name bc-extra">
+                            <span>Extras </span>
+                            <span class="dismissalSmall ng-binding">
+                                ( nb {{ extras_summary_1.nb }},
+                                  w {{ extras_summary_1.wd }},
+                                  b {{ extras_summary_1.b }},
+                                  lb {{ extras_summary_1.lb }},
+                                  pen {{ extras_summary_1.pen }} )
+                            </span>
+                        </div>
+                    </td>
+                    <td class="mobile-hide ng-binding">
+                        ( nb {{ extras_summary_1.nb }},
+                        w {{ extras_summary_1.wd }},
+                        b {{ extras_summary_1.b }},
+                        lb {{ extras_summary_1.lb }},
+                        pen {{ extras_summary_1.pen }} )
+                    </td>
+                    <td class="textCenter ng-binding">{{ extras_total_1 }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
         </div>
-        <div>
-          <label class="text-white">Wide</label>
-          <input type="number" name="extras_wd" min="0" value="0">
-        </div>
-        <div>
-          <label class="text-white">No-ball</label>
-          <input type="number" name="extras_nb" min="0" value="0">
-        </div>
-        <div>
-          <label class="text-white">Leg byes</label>
-          <input type="number" name="extras_lb" min="0" value="0">
-        </div>
-        <div>
-          <label class="text-white">Byes</label>
-          <input type="number" name="extras_b" min="0" value="0">
-        </div>
-        <div class="checkbox">
-          <label class="text-white"><input type="checkbox" name="wicket" > Wicket</label>
-          <input type="text" name="dismissal_desc" placeholder="">
-        </div>
-        <button type="submit">Add ball</button>
-      </form>
 
-      <div class="inline-forms">
-        <!-- Striker dropdown -->
-        <form method="post" action="{{ url_for('scoreboard.set_striker') }}">
-          <input type="hidden" name="match_id" value="{{ match.id }}">
-          <label class="text-white">Set Striker</label>
-          <select name="name" class="form-control">
-            <option disabled selected>Select</option>
-            {% for player in players_teamA %}
-            <option value="{{ player }}">{{ player }}</option>
-            {% endfor %}
-          </select>
-          <button type="submit" class="btn btn-primary mt-2">Set</button>
-        </form>
+        <!-- Bowler-->
+        <div class="ap-scorecard-outer col-100 floatLft sc-bow-card">
+            <table class="ap-scoreboard-table table-striped" width="100%" cellpadding="0" cellspacing="0">
+                <tbody>
+                <tr class="ap-head-row">
+                    <th width="20%" class="textLeft">Bowler</th>
+                    <th width="30%"></th>
+                    <th class="textCenter bowCItem">O</th>
+                    <th class="textCenter bowCItem">R</th>
+                    <th class="textCenter bowCItem">W</th>
+                    <th class="textCenter bowCItem">Econ</th>
+                </tr>
+                </tbody>
+                <tbody class="team1">
+                {% for item in bowling_scores_1 %}
+                <tr class="ng-scope">
+                    <td>
+                        <div class="ap-bats-score-name">
+                            <a href="javascript:void(0);" class="">
+                                <img class="ng-scope" title="{{ item.player.name }}" alt=""
+                                     src="{{ item.player.photo_url or 'default-player.png' }}">
+                                <span class="ng-binding"> {{ item.player.name }}</span>
+                            </a>
+                        </div>
+                    </td>
+                    <td></td>
+                    <td class="textCenter bowCItem ng-binding">{{ item.overs_notation }}</td>
+                    <td class="textCenter bowCItem ng-binding">{{ item.runs_conceded }}</td>
+                    <td class="textCenter op5 bowCItem ng-binding">{{ item.wickets_taken }}</td>
+                    <td class="textCenter bowCItem ng-binding">
+                        {% if item.overs_bowled and item.overs_bowled > 0 %}
+                            {{ "%.2f"|format(item.runs_conceded / (item.overs_bowled/6)) }}
+                        {% else %}
+                            0.00
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-        <!-- Non-striker dropdown -->
-        <form method="post" action="{{ url_for('scoreboard.set_non_striker') }}">
-          <input type="hidden" name="match_id" value="{{ match.id }}">
-          <label class="text-white">Set Non-Striker</label>
-          <select name="name" class="form-control">
-            <option disabled selected>Select</option>
-            {% for player in players_teamA %}
-              <option value="{{ player }}">{{ player }}</option>
-            {% endfor %}
-          </select>
-          <button type="submit" class="btn btn-secondary mt-2">Set</button>
-        </form>
+        <div id="pink-scorecard-a" class="ap-scorecard-outer col-100 floatLft sc-bow-card">
+            <h2 style="color: white;">Update ball</h2>
+            <form method="post" action="{{ url_for('scoreboard.update_ball') }}" class="form-grid">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_a">
+                <input type="hidden" name="batsman_player_id" value="{{ match.current_on_strike_id }}">
+                <input type="hidden" name="bowler_player_id" value="{{ match.current_bowler_id }}">
 
-        <!-- Bowler dropdown -->
-        <form method="post" action="{{ url_for('scoreboard.set_bowler') }}">
-          <input type="hidden" name="match_id" value="{{ match.id }}">
-          <label class="text-white">Set Bowler</label>
-          <select name="name" class="form-control">
-            <option disabled selected>Select</option>
-            {% for player in players_teamB %}
-              <option value="{{ player }}">{{ player }}</option>
-            {% endfor %}
-          </select>
-          <button type="submit" class="btn btn-info mt-2">Set</button>
-        </form>
-      </div>
+                <div>
+                    <label>Runs (bat)</label>
+                    <input type="number" name="runs_bat" min="0" max="6" value="0">
+                </div>
+                <div>
+                    <label>Wide</label>
+                    <input type="number" name="extras_wd" min="0" value="0">
+                </div>
+                <div>
+                    <label>No-ball</label>
+                    <input type="number" name="extras_nb" min="0" value="0">
+                </div>
+                <div>
+                    <label>Leg byes</label>
+                    <input type="number" name="extras_lb" min="0" value="0">
+                </div>
+                <div>
+                    <label>Byes</label>
+                    <input type="number" name="extras_b" min="0" value="0">
+                </div>
+                <div class="form-check">
+                    <label>
+                        <input type="checkbox" id="wicket" name="wicket" class="form-check-input">Wicket
+                    </label>
+                    <input type="text" name="dismissal_desc" placeholder="Dismissal description" class="form-control">
+                </div>
 
-    </section>
-  </div>
+                <button type="submit">Add ball</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Second Innings-->
+    <div id="team_b" class="scoreCardContentWrap ng-scope {% if selected_tab == 'team_b' %}active{% endif %}">
+        <div class="inline-forms d-flex justify-content-between align-items-start" style="gap:20px;">
+
+            <!-- Striker dropdown -->
+            <form method="post" action="{{ url_for('scoreboard.set_striker') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_b">
+                <input type="hidden" name="innings_no" value="{{ current_innings }}">
+
+
+                <label>Striker</label>
+                <select name="player_id" class="form-control mr-2">
+                    <option disabled selected>Select</option>
+                    {% for ps in players_teamB %}
+                    <option value="{{ ps.player.id }}">{{ ps.player.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Set</button>
+            </form>
+
+            <!-- Non-striker dropdown -->
+            <form method="post" action="{{ url_for('scoreboard.set_non_striker') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_b">
+                <input type="hidden" name="innings_no" value="{{ current_innings }}">
+
+
+                <label>Non-Striker</label>
+                <select name="player_id" class="form-control mr-2">
+                    <option disabled selected>Select</option>
+                    {% for ps in players_teamB %}
+                    <option value="{{ ps.player.id }}">{{ ps.player.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-secondary">Set</button>
+            </form>
+
+            <!-- Bowler dropdown -->
+            <form method="post" action="{{ url_for('scoreboard.set_bowler') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_b">
+                <input type="hidden" name="innings_no" value="{{ current_innings }}">
+
+
+                <label>Bowler</label>
+                <select name="player_id" class="form-control mr-2">
+                    <option disabled selected>Select</option>
+                    {% for ps in players_teamA %}
+                    <option value="{{ ps.player.id }}">{{ ps.player.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-info">Set</button>
+            </form>
+
+            <!-- Set Over -->
+            <form method="post" action="{{ url_for('scoreboard.set_overs_limit') }}"
+                  style="display:flex; align-items:center; gap:10px;">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_b">
+
+                <label for="overs_limit_b">Overs Limit</label>
+                <input type="number" id="overs_limit_b" name="overs_limit"
+                       class="form-control mr-2"
+                       min="1" max="50"
+                       value="{{ match.overs_limit or '' }}"
+                       placeholder="Enter overs">
+                <button type="submit" class="btn btn-success">Set Overs</button>
+            </form>
+        </div>
+
+        <div class="scoreCardContentHead">
+            <span class="sh_teamdet sh_teamdetL">
+                <span class="sh_teamLogo">
+                    <img src="{{ team_b_pic }}" alt="{{ team_b_name }}">
+                </span>
+                <span class="sh_teamName mob-hide">{{ team_b_name }}</span>
+                <span class="sh_teamName mob-show">{{ team_b_name }}</span>
+            </span>
+
+            <span class="sh_teamScoredet ng-scope">
+                <span class="sh_teamScore_Overs">Overs ({{ second_innings.overs }}) </span>
+                <span class="sh_teamScore_runs">{{ second_innings.runs }}/{{ second_innings.wickets }}</span>
+            </span>
+        </div>
+
+        <!-- Scorecard -->
+        <div class="ap-scorecard-outer col-100 floatLft mb-4">
+            <table class="ap-scoreboard-table table-striped" width="100%" cellpadding="0" cellspacing="0">
+                <thead>
+                <tr class="ap-head-row" style="background: #1b3e8a;color:#fff">
+                    <th class="textLeft">Batter</th>
+                    <th class="mobile-hide"></th>
+                    <th class="textCenter">R</th>
+                    <th class="textCenter">B</th>
+                    <th class="textCenter">4s</th>
+                    <th class="textCenter">6s</th>
+                    <th class="textCenter">SR</th>
+                </tr>
+                </thead>
+                <tbody class="team2">
+                {% for item in batting_scores_2 %}
+                <tr>
+                    <td>
+                        <div class="ap-bats-score-name">
+                            <img src="{{ item.player.photo_url or 'default-player.png' }}">
+                            <span>
+                                {{ item.player.name }}
+                                {% if item.player.id == match.current_on_strike_id %}<span class="striker-star">★</span>{% endif %}
+                                {% if item.player.id == match.current_non_strike_id %}<span class="non-striker">(ns)</span>{% endif %}
+                            </span>
+                            <span class="dismissalSmall">{{ item.dismissal_desc or '' }}</span>
+                        </div>
+                    </td>
+                    <td class="mobile-hide">{{ item.dismissal_desc or '' }}</td>
+                    <td class="textCenter">{{ item.batting_runs }}</td>
+                    <td class="textCenter">{{ item.balls_faced }}</td>
+                    <td class="textCenter">{{ item.fours }}</td>
+                    <td class="textCenter">{{ item.sixes }}</td>
+                    <td class="textCenter">
+                        {% if item.balls_faced %}
+                            {{ "%.2f"|format((item.batting_runs / item.balls_faced) * 100) }}
+                        {% else %}0.00{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+
+                <tr class="sc-extra-wrap">
+                    <td>
+                        <div class="ap-bats-score-name bc-extra">
+                            <span>Extras </span>
+                            <span class="dismissalSmall ng-binding">
+                                ( nb {{ extras_summary_2.nb }},
+                                  w {{ extras_summary_2.wd }},
+                                  b {{ extras_summary_2.b }},
+                                  lb {{ extras_summary_2.lb }},
+                                  pen {{ extras_summary_2.pen }} )
+                            </span>
+                        </div>
+                    </td>
+                    <td class="mobile-hide ng-binding">
+                        ( nb {{ extras_summary_2.nb }},
+                        w {{ extras_summary_2.wd }},
+                        b {{ extras_summary_2.b }},
+                        lb {{ extras_summary_2.lb }},
+                        pen {{ extras_summary_2.pen }} )
+                    </td>
+                    <td class="textCenter ng-binding">{{ extras_total_2 }}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bowling -->
+        <div class="ap-scorecard-outer col-100 floatLft sc-bow-card">
+            <table class="ap-scoreboard-table table-striped" width="100%" cellpadding="0" cellspacing="0">
+                <tbody>
+                <tr class="ap-head-row">
+                    <th class="textLeft">Bowler</th>
+                    <th></th>
+                    <th class="textCenter bowCItem">O</th>
+                    <th class="textCenter bowCItem">R</th>
+                    <th class="textCenter bowCItem">W</th>
+                    <th class="textCenter bowCItem">Econ</th>
+                </tr>
+                </tbody>
+                <tbody class="team2">
+                {% for item in bowling_scores_2 %}
+                <tr>
+                    <td>
+                        <div class="ap-bats-score-name">
+                            <img src="{{ item.player.photo_url or 'default-player.png' }}">
+                            <span>{{ item.player.name }}</span>
+                        </div>
+                    </td>
+                    <td></td>
+                    <td class="textCenter">{{ item.overs_notation }}</td>
+                    <td class="textCenter">{{ item.runs_conceded }}</td>
+                    <td class="textCenter">{{ item.wickets_taken }}</td>
+                    <td class="textCenter">
+                        {% if item.overs_bowled and item.overs_bowled > 0 %}
+                            {{ "%.2f"|format(item.runs_conceded / item.overs_bowled) }}
+                        {% else %}0.00{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Update ball UI -->
+        <div id="pink-scorecard-b" class="ap-scorecard-outer col-100 floatLft sc-bow-card">
+            <h2 style="color: white;">Update ball</h2>
+            <form method="post" action="{{ url_for('scoreboard.update_ball') }}" class="form-grid">
+                <input type="hidden" name="match_id" value="{{ match.id }}">
+                <input type="hidden" name="selected_tab" value="team_b">
+                <input type="hidden" name="batsman_player_id" value="{{ match.current_on_strike_id }}">
+                <input type="hidden" name="bowler_player_id" value="{{ match.current_bowler_id }}">
+
+                <div><label>Runs (bat)</label><input type="number" name="runs_bat" min="0" max="6" value="0"></div>
+                <div><label>Wide</label><input type="number" name="extras_wd" min="0" value="0"></div>
+                <div><label>No-ball</label><input type="number" name="extras_nb" min="0" value="0"></div>
+                <div><label>Leg byes</label><input type="number" name="extras_lb" min="0" value="0"></div>
+                <div><label>Byes</label><input type="number" name="extras_b" min="0" value="0"></div>
+
+                <div class="form-check">
+                    <label><input type="checkbox" name="wicket" class="form-check-input">Wicket</label>
+                    <input type="text" name="dismissal_desc" placeholder="Dismissal description" class="form-control">
+                </div>
+
+                <button type="submit">Add ball</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add jQuery (required by your inline scripts that use $) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJ+Yp6m6a2b1yZg2g1Bq3s4r6Gk2bFv3B3z0M="
+        crossorigin="anonymous"></script>
+
+<script src="https://scores.iplt20.com/ipl/mc/smMCApp.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCConfig.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/template-mc.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCController.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCService.js?v=1.15" type="text/javascript"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+
+<script>
+    $(window).on('load', function() {
+        var match = $('.live-matchInfo .matchOrder').text().trim();
+        var teamA = $('.fixtureSquadTeamsTabWrap .teamA-Squad').text().trim();
+        var teamB = $('.fixtureSquadTeamsTabWrap .teamB-Squad').text().trim();
+
+        if (match && teamA && teamB) {
+            var title = 'IPL 2024 | ' + match + ' : ' + teamA + ' vs ' + teamB;
+            var description = "Follow LIVE " + teamA + " vs " + teamB + " updates from the 2024 IPLT20 season, including playing XI and commentary on the official IPLT20 website";
+            var keywords = teamA + ' vs ' + teamB + ' 2024 Scorecard, ' + match + ' Result, IPL 2024, IPL match scores, IPL Match Centre, IPL Match Videos, IPL score updates, IPL final scores, IPL 2024 fixtures results, Indian Premier League results, IPL Photos, IPL 2024 scores, IPL Match Details';
+
+            $("meta[name='twitter:title']").attr('content', title);
+            $("meta[name='og:title']").attr('content', title);
+            $("meta[name='description']").attr('content', description);
+            $("meta[name='og:description']").attr('content', description);
+            $("meta[name='keywords']").attr('content', keywords);
+
+            console.log("Meta tags updated successfully");
+        } else {
+            console.log("Error: Unable to find match, teamA, or teamB text.");
+        }
+
+        console.log("Match No : " + match);
+        console.log("Team A : " + teamA);
+        console.log("Team B : " + teamB);
+    });
+</script>
+
+<script>
+    document.querySelectorAll('.ap-inner-tb-click').forEach(tab => {
+      tab.addEventListener('click', (event) => {
+        event.preventDefault(); // prevent navigation so client-side tab toggle works
+        // Toggle active tab
+        document.querySelectorAll('.ap-inner-tb-click').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        // Toggle scoreboards
+        document.querySelectorAll('.scoreCardContentWrap').forEach(sb => sb.classList.remove('active'));
+        const targetId = tab.getAttribute('data-target');
+        const el = document.getElementById(targetId);
+        if (el) el.classList.add('active');
+      });
+    });
+</script>
+<script>
+  const matchId = {{ match.id }};   // from template context
+  const socket = io("/", { path: "/socket.io" }); // adjust path if needed
+
+  socket.on("connect", () => {
+    console.log("socket connected:", socket.id);
+    // ask server to join the match room
+    socket.emit("join_match", { match_id: matchId });
+  });
+
+  // Received when a new ball added
+  socket.on("ball_update", (payload) => {
+    // Basic sanity
+    if (!payload || payload.match_id !== matchId) return;
+
+    // Update scoreboard summary
+    const inn = payload.innings_no;
+    const summary = payload.summary;
+    // Example: update top-line score
+    const first = summary.first;
+    const second = summary.second;
+    document.querySelector("#first_score").textContent = `${first.score}/${first.wickets}`;
+    document.querySelector("#first_overs").textContent = first.overs;
+    document.querySelector("#second_score").textContent = `${second.score}/${second.wickets}`;
+    document.querySelector("#second_overs").textContent = second.overs;
+
+    // Update batsman row (find by player_id)
+    const batsman = payload.match_scores.batsman;
+    const batsmanRow = document.querySelector(`#batsman_row_${batsman.player_id}`);
+    if (batsmanRow){
+      batsmanRow.querySelector(".runs").textContent = batsman.batting_runs;
+      batsmanRow.querySelector(".balls").textContent = batsman.balls_faced;
+      batsmanRow.querySelector(".fours").textContent = batsman.fours;
+      batsmanRow.querySelector(".sixes").textContent = batsman.sixes;
+      if (batsman.is_out) batsmanRow.classList.add("out");
+    } else {
+      // optionally insert new row if batsman didn't exist
+    }
+
+    // Update bowler row
+    const bowler = payload.match_scores.bowler;
+    const bowlerRow = document.querySelector(`#bowler_row_${bowler.player_id}`);
+    if (bowlerRow){
+      // convert overs_bowled_balls -> overs string
+      const balls = bowler.overs_bowled_balls || 0;
+      const overs = Math.floor(balls/6) + "." + (balls%6);
+      bowlerRow.querySelector(".overs").textContent = overs;
+      bowlerRow.querySelector(".runs_conceded").textContent = bowler.runs_conceded;
+      bowlerRow.querySelector(".wickets").textContent = bowler.wickets_taken;
+    }
+
+    // Update strike display
+    const on_strike = payload.players.on_strike;
+    const non_strike = payload.players.non_strike;
+    if (on_strike) document.querySelector("#on_strike_name").textContent = on_strike.name;
+    if (non_strike) document.querySelector("#non_strike_name").textContent = non_strike.name;
+    if (payload.players.current_bowler) document.querySelector("#current_bowler_name").textContent = payload.players.current_bowler.name;
+
+    // Update current over events UI (append the latest ball)
+    // You likely keep a #current_over list per innings
+    const ball = payload.ball;
+    if (ball){
+      const overList = document.querySelector("#current_over_list");
+      if (overList){
+        const li = document.createElement("li");
+        li.textContent = buildBallDesc(ball); // implement this helper
+        overList.appendChild(li);
+      }
+    }
+
+    // Optional: show toast that ball recorded successfully
+  });
+
+  // helper to convert ball payload to readable text
+  function buildBallDesc(ball){
+    if (!ball) return "";
+    if (ball.wicket) return "W";
+    const parts = [];
+    if (ball.extras){
+      if (ball.extras.wd) parts.push("Wd"+ball.extras.wd);
+      if (ball.extras.nb) parts.push("Nb"+ball.extras.nb + (ball.runs_bat ? "+"+ball.runs_bat : ""));
+      if (ball.extras.lb) parts.push("LB"+ball.extras.lb);
+      if (ball.extras.b) parts.push("B"+ball.extras.b);
+    }
+    if (ball.runs_bat && !(ball.extras && ball.extras.nb)) parts.push(ball.runs_bat);
+    return parts.join("+") || "0";
+  }
+</script>
+
 {% endblock %}

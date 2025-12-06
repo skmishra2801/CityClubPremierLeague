@@ -1,0 +1,13 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+<form method="POST" action="{{ url_for('ball.edit_ball', ball_id=be.id) }}">
+  <input type="number" name="over_no" value="{{ be.over_no }}" required>
+  <input type="number" name="ball_no" value="{{ be.ball_no }}" required>
+  <input type="number" name="runs" value="{{ be.runs }}" required>
+  <input type="text" name="extras" value="{{ be.extras }}">
+  <input type="number" name="extras_runs" value="{{ be.extras_runs }}">
+  <select name="is_wicket"><option value="0" {% if not be.is_wicket %}selected{% endif %}>No</option><option value="1" {% if be.is_wicket %}selected{% endif %}>Yes</option></select>
+  <input type="text" name="dismissal_desc" value="{{ be.dismissal_desc }}">
+  <button type="submit">Save</button>
+</form>
+{% endblock %}

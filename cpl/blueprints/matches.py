@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from cpl.blueprints.admin import admin_required
-from cpl.models import Match, Team, PointsTable
+from cpl.models import Match, Team, PointsTable, Season
 from datetime import datetime
 
 from cpl.services.points import rebuild_points_table
@@ -13,8 +13,15 @@ bp = Blueprint("matches", __name__)
 def fixtures():
     upcoming_matches = Match.query.filter(Match.status.in_(["Scheduled", "Live"])) \
                                   .order_by(Match.match_date.asc()).all()
-    completed_matches = Match.query.filter_by(status="Completed") \
-                                   .order_by(Match.match_date.desc()).all()
+    completed_matches = (
+        Match.query.filter(
+            ~Match.status.in_(["Scheduled", "Live"]),  # status not Scheduled/Live
+            Match.winner_id.isnot(None),  # winner_id not null
+            Match.winner_id != 0  # winner_id not 0
+        )
+        .order_by(Match.match_date.desc())
+        .all()
+    )
 
     # Build a dict of teams keyed by ID
     teams = {t.id: t for t in Team.query.all()}
@@ -72,6 +79,7 @@ def results():
 
 
 @bp.route("/<int:match_id>")
+@admin_required
 def detail(match_id):
     match = Match.query.get_or_404(match_id)
     teams = {team.id: team for team in Team.query.all()}  # 👈 dictionary with team IDs as keys
@@ -83,27 +91,42 @@ def detail(match_id):
 @admin_required
 def create_fixture():
     if request.method == "POST":
-        team_a_id = request.form["team_a"]
-        team_b_id = request.form["team_b"]
+        team_a_id = int(request.form["team_a"])
+        team_b_id = int(request.form["team_b"])
         venue = request.form["venue"]
-        match_date = datetime.strptime(request.form["match_date"], "%Y-%m-%dT%H:%M")
-        season = datetime.strptime(request.form["season"], "%Y-%m").year
+
+        match_date = datetime.strptime(
+            request.form["match_date"],
+            "%Y-%m-%dT%H:%M"
+        )
+
+        season_id = int(request.form["season"])   # season from dropdown
+
+        # Fetch full objects for short_code and relationships
+        team_a = Team.query.get_or_404(team_a_id)
+        team_b = Team.query.get_or_404(team_b_id)
+        season_obj = Season.query.get_or_404(season_id)
 
         new_match = Match(
-            title=f"{Team.query.get(team_a_id).short_code} vs {Team.query.get(team_b_id).short_code}",
+            title=f"{team_a.short_code} vs {team_b.short_code}",
             venue=venue,
             match_date=match_date,
             team_a_id=team_a_id,
             team_b_id=team_b_id,
             status="Scheduled",
-            season=season
+            season_id=season_obj.id
         )
+
         db.session.add(new_match)
         db.session.commit()
+
         flash("Fixture created successfully!", "success")
         return redirect(url_for("matches.fixtures"))
+
     teams = Team.query.order_by(Team.name.asc()).all()
-    return render_template("matches/create_fixture.html", teams=teams)
+    seasons = Season.query.order_by(Season.year.desc()).all()
+
+    return render_template("matches/create_fixture.html", teams=teams, seasons=seasons)
 
 
 @bp.route("/complete/<int:match_id>", methods=["POST"])

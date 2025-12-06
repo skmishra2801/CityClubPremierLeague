@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, session, redirect, url_for, request
 from functools import wraps
-from cpl.models import Admin
+from cpl.models import User
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
-# Admin required decorator
+
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -20,10 +20,11 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        admin = Admin.query.filter_by(username=username).first()
+        admin = User.query.filter_by(username=username).first()
 
         if admin and admin.check_password(password):
             session["is_admin"] = True
+            session["admin_username"] = admin.username  # store username too
             return redirect(url_for("main.home"))   # redirect to your homepage
 
         return "Invalid admin credentials"
@@ -34,4 +35,6 @@ def login():
 @bp.route("/logout")
 def logout():
     session.pop("is_admin", None)
+    session.pop("admin_username", None)
     return redirect(url_for("main.home"))
+

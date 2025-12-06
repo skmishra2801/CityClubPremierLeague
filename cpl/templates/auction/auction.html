@@ -2,74 +2,180 @@
 {% block title %}Auction{% endblock %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container my-4" xmlns="http://www.w3.org/1999/html">
+
     <h1 class="h5 mb-4">Player Auction</h1>
 
-  <form method="post">
-  <div class="row g-3 align-items-end">
-    <!-- Player selection -->
-    <div class="col-md-3">
-      <label class="form-label">Select Player</label>
-      <select name="player_id" id="playerSelect" class="form-select" required onchange="showPlayerInfo()">
-        <option value="">-- Choose Player --</option>
-        {% for p in players %}
-        <option value="{{ p.id }}" data-photo="{{ p.photo_url }}" data-role="{{ p.role }}">
-          {{ p.name }} (ID: {{ p.id }})
-        </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <!-- Team selection -->
-    <div class="col-md-3">
-      <label class="form-label">Sold To (Team)</label>
-      <select name="team_id" class="form-select" required>
-        <option value="">-- Choose Team --</option>
-        {% for t in teams %}
-        <option value="{{ t.id }}">{{ t.name }} ({{ t.short_code }})</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <!-- Sold amount -->
-    <div class="col-md-3">
-      <label class="form-label">Sold Amount</label>
-      <input type="number" step="0.01" name="amount" class="form-control" placeholder="Enter amount" required>
-    </div>
-
-    <!-- Submit button -->
-    <div class="col-md-3 d-flex">
-      <button type="submit" class="btn btn-primary ms-auto">Submit</button>
-    </div>
-  </div>
-</form>
-
-        <!-- Player info card -->
-        <div class="col-12 mt-3" id="playerInfo" style="display:none;">
-            <div class="card p-4" style="min-height:500px; width:500px; margin:auto;">
-                <img id="playerPhoto" src="" alt="Player Photo"
-                     class="rounded mb-3 img-fluid"
-                     style="height:500px; width:500px; object-fit:cover;">
-                <p class="mb-0 text-center text-white"><strong>Role:</strong> <span id="playerRole"></span></p>
+    <!-- YEAR FILTER -->
+    <form method="get" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Select Year</label>
+                <select name="year" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Choose Year --</option>
+                    {% for y in years %}
+                    <option value="{{ y }}" {% if selected_year== y %}selected{% endif %}>
+                        {{ y }}
+                    </option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
+    </form>
+
+    {% if selected_year %}
+    <!-- AUCTION FORM -->
+    <form method="post">
+        <div class="row g-3 align-items-end">
+
+            <!-- Player selection -->
+            <div class="col-md-3">
+                <label class="form-label">Select Player</label>
+                <select name="player_id" id="playerSelect" class="form-select" required onchange="showPlayerInfo()">
+                    <option value="">-- Choose Player --</option>
+                    {% for p in players %}
+                    <option value="{{ p.id }}"
+                            data-photo="{{ p.photo_url }}"
+                            data-name="{{ p.name }}"
+                            data-role="{{ p.role }}"
+                            data-matches="{{ player_summaries[p.id].match_played }}"
+                            data-runs="{{ player_summaries[p.id].total_runs }}"
+                            data-runavg="{{ player_summaries[p.id].batting_avg or 'N/A' }}"
+                            data-sr="{{ player_summaries[p.id].strike_rate or 'N/A' }}"
+                            data-highest="{{ player_summaries[p.id].highest_score or 'N/A' }}"
+                            data-overs="{{ player_summaries[p.id].overs_bowled or 'N/A' }}"
+                            data-wickets="{{ player_summaries[p.id].wickets_taken or 'N/A' }}"
+                            data-bowlavg="{{ player_summaries[p.id].bowling_economy or 'N/A' }}">
+                        {{ p.name }} (ID: {{ p.id }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Team selection -->
+            <div class="col-md-3">
+                <label class="form-label">Sold To (Team)</label>
+                <select name="team_id" class="form-select" required>
+                    <option value="">-- Choose Team --</option>
+                    {% for t in teams.values() %}
+                    <option value="{{ t.id }}">{{ t.name }} ({{ t.short_code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Amount -->
+            <div class="col-md-3">
+                <label class="form-label">Sold Amount</label>
+                <input type="number" step="0.01" name="amount" class="form-control" placeholder="Enter amount" required>
+            </div>
+
+            <!-- Submit button -->
+            <div class="col-md-3 d-flex">
+                <button type="submit" class="btn btn-primary ms-auto">Submit</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- PLAYER INFO CARDS -->
+    <div class="row mt-4" id="playerInfo" style="display:none;">
+        <!-- PHOTO CARD -->
+        <div class="col-md-6 d-flex justify-content-center">
+            <div class="card p-4" style="min-height:500px; width:500px;">
+                <img id="playerPhoto"
+                     src=""
+                     alt="Player Photo"
+                     class="rounded img-fluid"
+                     style="height:500px; width:500px; object-fit:cover;">
+            </div>
+        </div>
+
+        <!-- STAT CARD -->
+        <div class="col-md-6 d-flex justify-content-center">
+            <div class="card p-4 text-white fw-bold" style="min-height:500px; width:500px; background-color:#001f4d;">
+                <h4 id="statName" class="text-center mb-3"></h4><br>
+                <table style="font-size:18px;">
+                    <tr>
+                        <th>Role :</th>
+                        <td><span id="statRole"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Innings :</th>
+                        <td><span id="statMatches"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Runs :</th>
+                        <td><span id="statRuns"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Avg/SR :</th>
+                        <td><span id="statRunAvg"></span>/<span id="statSR"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Highest :</th>
+                        <td><span id="statHighest"></span></td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                    </tr>
+
+                    <tr>
+                        <th>Overs :</th>
+                        <td><span id="statOvers"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Wickets :</th>
+                        <td><span id="statWickets"></span></td>
+                    </tr>
+                    <tr>
+                        <th>Economy :</th>
+                        <td><span id="statBowlAvg"></span></td>
+                    </tr>
+                </table>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+    <p class="text-muted mt-4">Please select a year to load players.</p>
+    {% endif %}
 
 </div>
 
 <script>
     function showPlayerInfo() {
-      const select = document.getElementById("playerSelect");
-      const option = select.options[select.selectedIndex];
-      const photo = option.getAttribute("data-photo");
-      const role = option.getAttribute("data-role");
+        const select = document.getElementById("playerSelect");
+        const option = select.options[select.selectedIndex];
 
-      if (option.value) {
-        document.getElementById("playerInfo").style.display = "block";
-        document.getElementById("playerPhoto").src = photo || "{{ url_for('static', filename='image/default-player.png') }}";
-        document.getElementById("playerRole").textContent = role || "Unknown";
-      } else {
-        document.getElementById("playerInfo").style.display = "none";
-      }
+        if (!option.value) {
+            document.getElementById("playerInfo").style.display = "none";
+            return;
+        }
+
+        // Show section
+        document.getElementById("playerInfo").style.display = "flex";
+
+        // PHOTO
+        const photo = option.getAttribute("data-photo");
+        document.getElementById("playerPhoto").src =
+            photo || "{{ url_for('static', filename='image/default-player.png') }}";
+
+        // DETAILS
+        document.getElementById("statName").textContent = option.getAttribute("data-name");
+        document.getElementById("statRole").textContent = option.getAttribute("data-role") || "Unknown";
+
+        document.getElementById("statMatches").textContent = option.getAttribute("data-matches");
+        document.getElementById("statRuns").textContent = option.getAttribute("data-runs");
+        document.getElementById("statRunAvg").textContent = option.getAttribute("data-runavg");
+        document.getElementById("statSR").textContent = option.getAttribute("data-sr");
+        document.getElementById("statHighest").textContent = option.getAttribute("data-highest");
+
+        document.getElementById("statOvers").textContent = option.getAttribute("data-overs");
+        document.getElementById("statWickets").textContent = option.getAttribute("data-wickets");
+        document.getElementById("statBowlAvg").textContent = option.getAttribute("data-bowlavg");
     }
 </script>
+
 {% endblock %}

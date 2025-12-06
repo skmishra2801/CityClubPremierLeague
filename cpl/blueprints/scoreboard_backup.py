@@ -3,8 +3,6 @@ from flask import (
 )
 from sqlalchemy import func
 import json
-
-from cpl.blueprints.admin import admin_required
 from extensions import db
 from cpl.models import (
     Match, Season, PlayerSeason, Team, MatchScore,
@@ -240,7 +238,169 @@ def scoreboard_page():
     return render_template("scoreboard/list.html", matches=matches, seasons=seasons, selected_season=selected_season)
 
 
-
+# @bp.route("/scoreboard/<int:match_id>")
+# def scoreboard(match_id):
+#     match = Match.query.get(match_id)
+#     if not match:
+#         flash("Match not found.", "danger")
+#         return redirect(url_for("scoreboard.scoreboard_page"))
+#
+#     # ✅ Check toss_winner before proceeding
+#     if not match.toss_winner:
+#         flash("Toss not yet decided. Please set the toss.", "info")
+#         return redirect(url_for("scoreboard.toss_page", match_id=match.id))
+#
+#     state = rebuild_state_from_db(match_id)
+#     selected_tab = request.args.get("selected_tab", "team_a")
+#
+#     # --- Players by team ---
+#     players_teamA = PlayerSeason.query.filter_by(
+#         team_id=match.team_a_id,
+#         season_id=match.season_id
+#     ).all()
+#
+#     players_teamB = PlayerSeason.query.filter_by(
+#         team_id=match.team_b_id,
+#         season_id=match.season_id
+#     ).all()
+#
+#     # --- Team objects ---
+#     team_a = Team.query.get(match.team_a_id) if match.team_a_id else None
+#     team_b = Team.query.get(match.team_b_id) if match.team_b_id else None
+#
+#     team_a_name = team_a.name if team_a else "Team A"
+#     team_b_name = team_b.name if team_b else "Team B"
+#
+#     team_a_pic = team_a.team_picture_url if team_a and team_a.team_picture_url else "default-team-logo.png"
+#     team_b_pic = team_b.team_picture_url if team_b and team_b.team_picture_url else "default-team-logo.png"
+#
+#     # --- Innings and overs ---
+#     current_innings = getattr(match, "current_innings_no", 1) or 1
+#     overs1 = getattr(match, "overs_limit_innings1", None)
+#     overs2 = getattr(match, "overs_limit_innings2", None)
+#
+#     # --- Player dictionary ---
+#     player_dict = {
+#         ps.player.name: ps.player
+#         for ps in PlayerSeason.query.filter_by(season_id=match.season_id).all()
+#     }
+#
+#     # --- Helper function for overs/runs/wickets ---
+#     innings_state = {
+#         "first_innings_score": match.first_innings_score,
+#         "first_innings_wickets": match.first_innings_wickets,
+#         "first_innings_balls": match.first_innings_balls,
+#         "second_innings_score": match.second_innings_score,
+#         "second_innings_wickets": match.second_innings_wickets,
+#         "second_innings_balls": match.second_innings_balls
+#     }
+#     def calc_innings_stats(innings_state):
+#         def format_innings(balls, runs, wickets):
+#             overs = balls // 6
+#             balls_in_current_over = balls % 6
+#             running_over = f"{overs}.{balls_in_current_over}"
+#             return {
+#                 "overs": running_over,
+#                 "runs": runs,
+#                 "wickets": wickets
+#             }
+#
+#         first_innings = format_innings(
+#             innings_state.get("first_innings_balls", 0),
+#             innings_state.get("first_innings_score", 0),
+#             innings_state.get("first_innings_wickets", 0)
+#         )
+#
+#         second_innings = format_innings(
+#             innings_state.get("second_innings_balls", 0),
+#             innings_state.get("second_innings_score", 0),
+#             innings_state.get("second_innings_wickets", 0)
+#         )
+#
+#         return first_innings, second_innings
+#     first_innings, second_innings = calc_innings_stats(innings_state)
+#
+#
+#     # ✅ Decide batting/bowling team IDs based on innings
+#     if current_innings == 1:
+#         batting_team_id = match.team_a_id
+#         bowling_team_id = match.team_b_id
+#     else:
+#         batting_team_id = match.team_b_id
+#         bowling_team_id = match.team_a_id
+#
+#     # --- Squad lists ---
+#     batting_players = PlayerSeason.query.filter_by(
+#         team_id=batting_team_id,
+#         season_id=match.season_id
+#     ).all()
+#
+#     bowling_players = PlayerSeason.query.filter_by(
+#         team_id=bowling_team_id,
+#         season_id=match.season_id
+#     ).all()
+#
+#     # --- Scores ---
+#     scores = {
+#         s.player_id: s
+#         for s in MatchScore.query.filter_by(
+#             match_id=match.id,
+#             innings_no=current_innings
+#         ).all()
+#     }
+#
+#     batting_scores = MatchScore.query.filter_by(
+#         match_id=match.id,
+#         innings_no=current_innings,
+#         team_id=batting_team_id
+#     ).all()
+#
+#     bowling_scores = MatchScore.query.filter_by(
+#         match_id=match.id,
+#         innings_no=current_innings,
+#         team_id=bowling_team_id
+#     ).all()
+#     # Query all ball records for this match + innings
+#     balls = MatchBall.query.filter_by(match_id=match.id, innings_no=match.current_innings_no).all()
+#     extras_summary = {
+#         "nb": sum(ball.extras().get("nb", 0) for ball in balls),
+#         "wd": sum(ball.extras().get("wd", 0) for ball in balls),
+#         "b": sum(ball.extras().get("b", 0) for ball in balls),
+#         "lb": sum(ball.extras().get("lb", 0) for ball in balls),
+#         "pen": sum(ball.extras().get("pen", 0) for ball in balls),
+#     }
+#
+#     extras_total = sum(extras_summary.values())
+#
+#     return render_template(
+#         "scoreboard/scoreboard.html",
+#         match=match,
+#         extras_summary=extras_summary,
+#         extras_total=extras_total,
+#         state=state,
+#         players_teamA=players_teamA,
+#         players_teamB=players_teamB,
+#         team_a_name=team_a_name,
+#         team_b_name=team_b_name,
+#         team_a_pic=team_a_pic,
+#         team_b_pic=team_b_pic,
+#         current_innings=current_innings,
+#         overs1=overs1,
+#         overs2=overs2,
+#         # team_a_over=team_a_over,
+#         # team_a_runs=team_a_runs,
+#         # team_a_wkts=team_a_wkts,
+#         # team_b_over=team_b_over,
+#         # team_b_runs=team_b_runs,
+#         # team_b_wkts=team_b_wkts,
+#         batting_players=batting_players,
+#         bowling_players=bowling_players,
+#         selected_tab=selected_tab,
+#         batting_scores=batting_scores,
+#         bowling_scores=bowling_scores,
+#         first_innings=first_innings,
+#         second_innings=second_innings
+#     )
 @bp.route("/scoreboard/<int:match_id>")
 def scoreboard(match_id):
     match = Match.query.get(match_id)
@@ -361,7 +521,6 @@ def scoreboard(match_id):
     )
 
 @bp.route("/set_striker", methods=["POST"])
-@admin_required
 def set_striker():
     match_id = int(request.form.get("match_id"))
     pid = int(request.form.get("player_id"))
@@ -437,7 +596,6 @@ def set_striker():
         url_for("scoreboard.scoreboard", match_id=match_id, selected_tab=selected_tab)
     )
 @bp.route("/set_non_striker", methods=["POST"])
-@admin_required
 def set_non_striker():
     match_id = int(request.form.get("match_id"))
     pid = int(request.form.get("player_id"))
@@ -499,7 +657,6 @@ def set_non_striker():
 
 
 @bp.route("/set_bowler", methods=["POST"])
-@admin_required
 def set_bowler():
     match_id = int(request.form.get("match_id"))
     pid = int(request.form.get("player_id"))
@@ -587,7 +744,7 @@ def update_score(match_id):
 # Add Ball (DB-only)
 # ----------------------------
 @bp.route("/update_ball", methods=["POST"])
-@admin_required
+@bp.route("/update_ball", methods=["POST"])
 def update_ball():
     print("DEBUG: entered update_ball route", flush=True)
 
@@ -756,46 +913,6 @@ def update_ball():
                 match.current_non_strike_id = None
                 match.current_bowler_id = None
                 flash("First innings complete. Second innings begins!", "info")
-        #Winner Logic
-            # ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
-            # ⭐       WINNER / MATCH RESULT LOGIC
-            # ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
-        if match.current_innings_no == 2 and match.winner_id is None:
-
-            runs_2 = match.second_innings_score or 0
-            wickets_2 = match.second_innings_wickets or 0
-            balls_2 = match.second_innings_balls or 0
-
-            first_score = match.first_innings_score or 0
-            target = first_score + 1
-
-            overs_limit = match.overs_limit_innings2 or match.overs_limit_innings1 or 20
-            max_balls = overs_limit * 6
-
-            team1 = Team.query.get(first_batting_team_id)
-            team2 = Team.query.get(second_batting_team_id)
-
-            # 1️⃣ SECOND TEAM WINS
-            if runs_2 >= target:
-                match.winner_id = second_batting_team_id
-                remaining_wkts = 10 - wickets_2
-                match.status = f"{team2.name} won by {remaining_wkts} wickets"
-
-            else:
-                # 2️⃣ Overs finished or all out
-                if balls_2 >= max_balls or wickets_2 >= 10:
-
-                    if first_score > runs_2:
-                        diff = first_score - runs_2
-                        match.winner_id = first_batting_team_id
-                        match.status = f"{team1.name} won by {diff} runs"
-
-                    elif first_score == runs_2:
-                        match.winner_id = None
-                        match.status = "Match Tied"
-
-            # ⭐ END WINNER LOGIC
-
 
         db.session.commit()
 
@@ -1187,59 +1304,28 @@ def compute_match_nrr(match_id: int):
 
 def update_points_table_for_match(match_id: int, win_points=2, tie_points=1, loss_points=0):
     match = Match.query.get(match_id)
-    if not match or not match.toss_winner:
+    if not match:
         return
-
-    teamA_id = match.team_a_id
-    teamB_id = match.team_b_id
-
-    def get_or_create_points(team_id, season_id):
-        row = PointsTable.query.filter_by(team_id=team_id, season_id=season_id).first()
-        if not row:
-            row = PointsTable(team_id=team_id, season_id=season_id,
-                              matches=0, wins=0, losses=0, ties=0,
-                              points=0, nrr=0.0, recent_form="")
-            db.session.add(row)
-        return row
-
-    teamA_row = get_or_create_points(teamA_id, match.season_id)
-    teamB_row = get_or_create_points(teamB_id, match.season_id)
-
-    # Both teams played
-    teamA_row.matches += 1
-    teamB_row.matches += 1
-
-    if match.winner_id is None:
-        # Tie
-        teamA_row.ties += 1
-        teamB_row.ties += 1
-        teamA_row.points += tie_points
-        teamB_row.points += tie_points
-
-        # Update recent form
-        teamA_row.recent_form = (teamA_row.recent_form + " T").strip()
-        teamB_row.recent_form = (teamB_row.recent_form + " T").strip()
+    inn1 = compute_innings_totals(match_id, 1)
+    inn2 = compute_innings_totals(match_id, 2)
+    if not inn1["team_id"] or not inn2["team_id"]:
+        return
+    teamA_id = inn1["team_id"]
+    teamB_id = inn2["team_id"]
+    runs_A = inn1["runs"]
+    runs_B = inn2["runs"]
+    if runs_A > runs_B:
+        winner_id = teamA_id
+        loser_id = teamB_id
+        is_tie = False
+    elif runs_B > runs_A:
+        winner_id = teamB_id
+        loser_id = teamA_id
+        is_tie = False
     else:
-        winner_row = get_or_create_points(match.winner_id, match.season_id)
-        loser_id = teamA_id if match.winner_id == teamB_id else teamB_id
-        loser_row = get_or_create_points(loser_id, match.season_id)
-
-        winner_row.wins += 1
-        winner_row.points += win_points
-        loser_row.losses += 1
-        loser_row.points += loss_points
-
-        # Update recent form
-        winner_row.recent_form = (winner_row.recent_form + " W").strip()
-        loser_row.recent_form = (loser_row.recent_form + " L").strip()
-
-    # Trim recent_form to last 5 results
-    for row in [teamA_row, teamB_row]:
-        results = row.recent_form.split()
-        row.recent_form = " ".join(results[-5:])
-
-    db.session.commit()
-
+        winner_id = None
+        loser_id = None
+        is_tie = True
 
     def _get_or_create_points(season_id, team_id):
         pt = PointsTable.query.filter_by(season_id=match.season_id, team_id=team_id).first()

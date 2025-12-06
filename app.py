@@ -1,6 +1,7 @@
 from flask import Flask
 from datetime import datetime
 from config import Config
+from cpl.blueprints.ball_events import bp_ball
 from extensions import db
 
 # Blueprints
@@ -30,6 +31,8 @@ def create_app():
     app.register_blueprint(auction_bp, url_prefix="/auction")
     app.register_blueprint(scoreboard_bp, url_prefix="/scoreboard")
     app.register_blueprint(admin_bp)
+    app.register_blueprint(bp_ball)
+
 
     # Create tables
     with app.app_context():

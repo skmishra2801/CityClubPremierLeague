@@ -1,229 +1,268 @@
-:root {
-  --bg: #0f0f12;
-  --card: #1a1a1f;
-  --accent: #5bc0be;
-  --text: #eaeaea;
-  --muted: #a6a6b2;
-  --danger: #ff6b6b;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial, sans-serif;
-  padding-top: 60px;
-}
+/* static/css/score.css */
+body { background:#111; color:#eee; font-family: Inter, Arial, sans-serif; }
+.container { max-width:1200px; margin:16px auto; padding:12px; }
+.card { background:#1f1f1f; padding:12px; border-radius:10px; margin-bottom:12px; }
+.btn { background:#0d6efd; color:white; border-radius:6px; padding:6px 8px; border:none; cursor:pointer; }
 
 .container {
   max-width: 1100px;
-  margin: 24px auto;
-  padding: 0 16px;
+  margin: 16px auto;
+  padding: 0 12px;
+  color: #eef2f7;
+  font-family: Inter, Roboto, Arial, sans-serif;
 }
 
-/* Header section */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background-color: #0b132b; /* ensure background covers content */
-  height: 50px;
-}
-.site-header .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 12px; /* tighter padding */
-  height: 100%;
-  display: flex;
   align-items: center;
-  justify-content: space-between;
+  margin-bottom: 14px;
 }
 
-/* Brand logo + text */
-.brand img {
-  height: 32px; /* smaller logo */
+.header .teams h1 {
+  margin: 0 0 6px 0;
+  font-size: 20px;
 }
 
-
-.header h1 {
+.header .score {
   margin: 0;
-  font-size: 1.6rem;
+  color: #d1e7ff;
 }
 
-.score {
-  margin: 6px 0 0;
-  font-size: 1.1rem;
-}
-
-.context p {
-  margin: 0;
-  color: var(--muted);
-}
-
-/* Grid layout for batting/bowling/timeline */
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
 }
 
 .card {
-  background: var(--card);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  background: #0f1724;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.6);
 }
 
-.card h2 {
-  margin: 0 0 12px;
-  font-size: 1.2rem;
-  color: var(--accent);
+.full-width {
+  grid-column: 1 / -1;
 }
 
-/* Tables */
 table {
   width: 100%;
   border-collapse: collapse;
+  color: #fff;
 }
 
-th, td {
-  padding: 10px 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+table thead th {
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 13px;
+  padding: 8px 6px;
+  color: #9fb3d6;
 }
 
-th {
-  color: var(--muted);
-  font-weight: 600;
+table tbody td {
+  padding: 8px 6px;
+  border-top: 1px solid rgba(255,255,255,0.03);
 }
 
-tr.strike td:first-child::after {
-  content: " ★";
-  color: var(--accent);
+.strike {
+  background: rgba(60, 160, 255, 0.06);
 }
 
-tr.nonstrike td:first-child::after {
-  content: " •";
-  color: var(--muted);
+.nonstrike {
+  background: rgba(60, 255, 160, 0.03);
 }
 
-tr.current td:first-child {
-  color: var(--accent);
+.current {
+  background: rgba(255, 220, 120, 0.03);
 }
 
-/* Over timeline */
-.overs {
-  display: grid;
-  gap: 10px;
-}
-
-.over {
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
-  padding: 8px;
+.overs .over {
+  margin-bottom: 8px;
 }
 
 .over-title {
-  color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 13px;
+  color: #cfe8ff;
   margin-bottom: 6px;
 }
 
-.balls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.ball {
+.balls .ball {
   display: inline-block;
-  padding: 6px 10px;
-  background: rgba(91,192,190,0.18);
-  border: 1px solid rgba(91,192,190,0.6);
-  border-radius: 999px;
-  font-weight: 600;
+  padding: 6px 8px;
+  margin-right: 6px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  font-size: 13px;
 }
 
-.ball.wicket {
-  background: rgba(255,107,107,0.16);
-  border-color: rgba(255,107,107,0.7);
-  color: #ffb3b3;
+.balls .ball.wicket {
+  background: rgba(255, 70, 70, 0.12);
+  color: #ffdddd;
 }
 
-/* Forms */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
 
-.form-grid input,
-.inline-forms input,
-select {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-}
-
-.form-grid .checkbox {
-  grid-column: span 3;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-button {
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: none;
-  background: var(--accent);
-  color: #0f0f12;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background: #3caea3;
-}
-
-/* Inline forms */
 .inline-forms {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-top: 12px;
   flex-wrap: wrap;
 }
 
-.inline-forms form {
+.overs-form {
   display: flex;
-  gap: 8px;
   align-items: center;
+  margin-bottom: 10px;
 }
 
-/* Responsive */
-@media (max-width: 800px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .inline-forms {
-    flex-direction: column;
-  }
+.alert.banner {
+  padding: 10px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  background: #163a1f;
+  color: #d6f5d6;
+  border: 1px solid rgba(0,0,0,0.1);
 }
+/* General text color for labels */
+.text-white {
+    color: white !important;
+}
+
+/* Inputs, selects, and number fields */
+form input[type="number"],
+form input[type="text"],
+form select {
+    background-color: #2b2b2b;  /* dark background */
+    color: #ffffff;             /* white text */
+    border: 1px solid #555;     /* visible border */
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+/* Checkbox label */
+form .checkbox label {
+    color: #ffffff;
+}
+
+/* Button */
+form button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+/* Optional: adjust placeholder color */
+form input::placeholder {
+    color: #ccc;
+}
+/* Container for balls */
+.balls {
+    display: flex;
+    gap: 4px;
+}
+
+/* Each ball */
+.ball {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    background-color: #333; /* dark background for contrast */
+    color: #ffffff; /* default run color: white */
+    font-weight: bold;
+}
+
+/* Wicket */
+.ball.wicket {
+    color: #ff4c4c; /* red for wicket */
+}
+
+/* Boundaries */
+.ball.four {
+    color: #1e90ff; /* blue for 4s */
+}
+
+.ball.six {
+    color: #32cd32; /* green for 6s */
+}
+.ball {
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin: 3px;
+    display: inline-block;
+    background: white;
+    color: black;
+    font-weight: bold;
+    position: relative;
+}
+
+.ball.wicket {
+    background: red;
+    color: white;
+}
+
+.ball.four {
+    background: royalblue;
+    color: white;
+}
+
+.ball.six {
+    background: green;
+    color: white;
+}
+
+.ball .btn {
+    padding: 1px 4px;
+    font-size: 10px;
+    margin-left: 5px;
+}
+h1 {
+    color: #00B7EB;
+}
+
+h3, h2 {
+    color: #00B7EB;
+}
+p {
+    color: blue;
+}
+span{
+	color: #0FFFFF;
+}
+
+
+.player-cell { display:flex; align-items:center; gap:8px; }
+.player-avatar {
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  object-fit:cover;
+  border:2px solid rgba(255,255,255,0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.player-initials {
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#2a9df4,#1b61c9);
+  color:white;
+  font-weight:600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.player-name { color:#fff; font-weight:500; margin-left:4px; }

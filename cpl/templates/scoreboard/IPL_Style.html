@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cricket Scoreboard Tabs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/bootstrap-5.3.3.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/dataTables.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/font-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/IPL/ipl-style.min.css') }}">
+</head>
+<body>
+<div class="MyApp">
+    <div class="w-100 d-flex justify-content-between align-baseline mb-3">
+        <div class="ap-outer-tb-wrp tab-w-con mb-3">
+            <a href="javascript:void(0);" class="ap-inner-tb-click">AAHAN
+                <span class="mob-hide">Innings </span>
+            </a>
+            <a href="javascript:void(0);" class="ap-inner-tb-click">NSOLN
+                <span class="mob-hide">Innings </span>
+            </a>
+        </div>
+        <div class="scoreCardContentWrap ng-scope" ng-if="battingCard.length &gt; 0">
+            <div class="scoreCardContentHead">
+            <span class="sh_teamdet sh_teamdetL">
+                <span class="sh_teamLogo">
+                    <img src="" alt="AAHAN" src="">
+                </span>
+                <span class="sh_teamName mob-hide">AAHAN</span>
+                 <span class="sh_teamName mob-show">AAHAN</span>
+            </span>
+                <span class="sh_teamScoredet ng-scope">
+                <span class="sh_teamScore_Overs">Overs (20.0) </span>
+                <span class="sh_teamScore_runs">184/7 </span>
+            </span>
+                <span class="sh_teamdet sh_teamdetL">
+                <span class="sh_teamLogo">
+                    <img src="" alt="AAHAN">
+                </span>
+                <span class="sh_teamName mob-hide">AAHAN</span>
+                 <span class="sh_teamName mob-show">AAHAN</span>
+            </span>
+                <span class="sh_teamScoredet ng-scope">
+                <span class="sh_teamScore_Overs ">Overs (20.0) </span>
+                <span class="sh_teamScore_runs">184/7 </span>
+            </span>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://scores.iplt20.com/ipl/mc/smMCApp.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCConfig.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/template-mc.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCController.js?v=1.15" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCService.js?v=1.15" type="text/javascript"></script>
+<script>
+    $(window).on('load', function() {
+        var match = $('.live-matchInfo .matchOrder').text().trim();
+        var teamA = $('.fixtureSquadTeamsTabWrap .teamA-Squad').text().trim();
+        var teamB = $('.fixtureSquadTeamsTabWrap .teamB-Squad').text().trim();
+
+        if (match && teamA && teamB) {
+            var title = 'IPL 2024 | ' + match + ' : ' + teamA + ' vs ' + teamB;
+            var description = "Follow LIVE " + teamA + " vs " + teamB + " updates from the 2024 IPLT20 season, including playing XI and commentary on the official IPLT20 website";
+            var keywords = teamA + ' vs ' + teamB + ' 2024 Scorecard, ' + match + ' Result, IPL 2024, IPL match scores, IPL Match Centre, IPL Match Videos, IPL score updates, IPL final scores, IPL 2024 fixtures results, Indian Premier League results, IPL Photos, IPL 2024 scores, IPL Match Details';
+
+            $("meta[name='twitter:title']").attr('content', title);
+            $("meta[name='og:title']").attr('content', title);
+            $("meta[name='description']").attr('content', description);
+            $("meta[name='og:description']").attr('content', description);
+            $("meta[name='keywords']").attr('content', keywords);
+
+            console.log("Meta tags updated successfully");
+        } else {
+            console.log("Error: Unable to find match, teamA, or teamB text.");
+        }
+
+        console.log("Match No : " + match);
+        console.log("Team A : " + teamA);
+        console.log("Team B : " + teamB);
+    });
+
+</script>
+</body>
+</html>

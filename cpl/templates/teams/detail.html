@@ -3,40 +3,68 @@
 
 {% block content %}
 <div class="container my-4">
+
+  <!-- TEAM HEADER -->
   <div class="d-flex align-items-center gap-3 mb-4">
     {% if team.logo_url %}
-    <img src="{{ team.logo_url }}" alt="{{ team.short_code }}" class="rounded" style="height: 80px;">
+      <img src="{{ team.logo_url }}" alt="{{ team.short_code }}" class="rounded" style="height: 80px;">
     {% endif %}
     <div>
-      <h1 class="h4 mb-1">{{ team.name }} <small class="text-white">({{ team.short_code }})</small></h1>
+      <h1 class="h4 mb-1">
+        {{ team.name }}
+        <small class="text-white">({{ team.short_code }})</small>
+      </h1>
       <div class="small text-white">
-        {{ team.city }}{% if team.founded %} · Founded {{ team.founded }}{% endif %}{% if team.coach %} · Coach: {{ team.coach }}{% endif %}
+        {{ team.city }}
+        {% if team.founded %} · Founded {{ team.founded }}{% endif %}
+        {% if team.coach %} · Coach: {{ team.coach }}{% endif %}
       </div>
     </div>
   </div>
 
-  <h2 class="h5 mb-3">Players</h2>
+  <!-- YEAR SELECTOR -->
+  <form method="get" class="mb-3">
+    <label class="form-label text-white fw-bold">Select Season</label>
+    <select name="year" class="form-select bg-dark text-white" onchange="this.form.submit()">
+      {% for y in years %}
+        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+      {% endfor %}
+    </select>
+  </form>
+
+  <h2 class="h5 mb-3 text-white">
+    Players – {{ selected_year }}
+  </h2>
+
   {% if players %}
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
-  {% for player in players %}
-  <div class="col">
-    <div class="card h-100 text-center bg-dark">
-      {% if player.photo_url %}
-        <img src="{{ player.photo_url }}" alt="{{ player.name }}" class="card-img-top" style="height:200px; object-fit:cover;">
-      {% else %}
-        <img src="{{ url_for('static', filename='image/default-player.png') }}" alt="No photo" class="card-img-top" style="height:200px; object-fit:cover;">
-      {% endif %}
-      <div class="card-body p-2">
-        <h6 class="card-title mb-1 text-white">{{ player.name }}</h6>
-        <p class="small mb-0 text-white">{{ player.role }}</p>
+
+    {% for player in players %}
+    <div class="col">
+      <div class="card h-100 text-center bg-dark border-secondary">
+
+        {% if player.photo_url %}
+          <img src="{{ player.photo_url }}" alt="{{ player.name }}"
+               class="card-img-top" style="height:200px; object-fit:cover;">
+        {% else %}
+          <img src="{{ url_for('static', filename='image/default-player.png') }}"
+               alt="No photo" class="card-img-top" style="height:200px; object-fit:cover;">
+        {% endif %}
+
+        <div class="card-body p-2">
+          <h6 class="card-title mb-1 text-white">{{ player.name }}</h6>
+          <p class="small mb-0 text-white">{{ player.role }}</p>
+        </div>
+
       </div>
     </div>
+    {% endfor %}
+
   </div>
-  {% endfor %}
-</div>
 
   {% else %}
-  <p class="text-muted">No players assigned to this team yet.</p>
+    <p class="text-muted">No players assigned to this team for {{ selected_year }}.</p>
   {% endif %}
+
 </div>
 {% endblock %}

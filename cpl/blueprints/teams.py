@@ -1,29 +1,116 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 
 from cpl.blueprints.admin import admin_required
-from cpl.models import Team, Match, PointsTable, TeamBalance
+from cpl.models import Team, Match, PointsTable, TeamBalance, PlayerSeason, Player, Season
 from extensions import db
 import cloudinary.uploader
 
 bp = Blueprint("teams", __name__, url_prefix="/teams")
 
 
+from sqlalchemy import distinct
+
+@bp.route("/season/<int:season_id>")
+def season_teams(season_id):
+    # Get distinct team IDs
+    team_ids = (
+        db.session.query(distinct(PlayerSeason.team_id))
+        .filter(PlayerSeason.season_id == season_id, PlayerSeason.team_id.isnot(None))
+        .all()
+    )
+    team_ids = [tid[0] for tid in team_ids]  # flatten list of tuples
+
+    # Query Team objects
+    teams = Team.query.filter(Team.id.in_(team_ids)).all()
+    print(teams)
+
+    return render_template("teams/list.html", teams=teams, season_id=season_id)
+
+
 @bp.route("/")
 def list_teams():
+    # Season selection
+    selected_year = request.args.get("year", type=int)
+    seasons = Season.query.order_by(Season.year.desc()).all()
+    years = [s.year for s in seasons]
+
+    if not selected_year and seasons:
+        selected_year = seasons[0].year
+
+    selected_season = next((s for s in seasons if s.year == selected_year), None)
+    selected_season_id = selected_season.id if selected_season else None
+
+    # Pagination setup
     page = request.args.get("page", 1, type=int)
     per_page = 10
-    pagination = Team.query.order_by(Team.name.asc()).paginate(page=page, per_page=per_page, error_out=False)
-    teams = pagination.items
-    return render_template("teams/list.html", teams=teams, pagination=pagination)
+
+    teams = []
+    pagination = None
+
+    if selected_season_id:
+        # Get distinct team IDs for this season
+        team_ids = (
+            db.session.query(PlayerSeason.team_id)
+            .filter(PlayerSeason.season_id == selected_season_id,
+                    PlayerSeason.team_id.isnot(None))
+            .distinct()
+            .all()
+        )
+        team_ids = [tid[0] for tid in team_ids]
+
+        # Paginate only those teams
+        pagination = Team.query.filter(Team.id.in_(team_ids))\
+            .order_by(Team.name.asc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
+
+        teams = pagination.items
+
+    return render_template(
+        "teams/list.html",
+        teams=teams,
+        pagination=pagination,
+        years=years,
+        selected_year=selected_year
+    )
 
 
 @bp.route("/<int:team_id>")
 def team_detail(team_id):
     team = Team.query.get_or_404(team_id)
-    # assuming you have a relationship Team.players
-    players = team.players
-    return render_template("teams/detail.html", team=team, players=players)
 
+    # Selected year from query params
+    selected_year = request.args.get("year", type=int)
+
+    # All seasons for dropdown
+    seasons = Season.query.order_by(Season.year.desc()).all()
+    years = [s.year for s in seasons]
+
+    # Default year = latest season
+    if not selected_year and seasons:
+        selected_year = seasons[0].year
+
+    # Get Season object
+    season_obj = Season.query.filter_by(year=selected_year).first()
+
+    players = []
+    if season_obj:
+        # Get PlayerSeason rows for this team & selected season
+        ps_rows = PlayerSeason.query.filter_by(
+            team_id=team.id,
+            season_id=season_obj.id
+        ).all()
+
+        # Fetch Player objects
+        player_ids = [ps.player_id for ps in ps_rows]
+        players = Player.query.filter(Player.id.in_(player_ids)).all()
+
+    return render_template(
+        "teams/detail.html",
+        team=team,
+        players=players,
+        years=years,
+        selected_year=selected_year
+    )
 
 @bp.route("/add", methods=["GET", "POST"])
 @admin_required
@@ -34,20 +121,20 @@ def add_team():
         city = request.form.get("city")
         coach = request.form.get("coach")
 
-        logo_url = None
-        if "logo_file" in request.files:
-            file = request.files["logo_file"]
+        team_picture_url = None
+        if "team_picture" in request.files:
+            file = request.files["team_picture"]
             if file:
                 # Upload to Cloudinary
                 upload_result = cloudinary.uploader.upload(file)
-                logo_url = upload_result["secure_url"]  # hosted URL
+                team_picture_url = upload_result["secure_url"]
 
         new_team = Team(
             name=name,
             short_code=short_code,
             city=city,
             coach=coach,
-            logo_url=logo_url
+            team_picture_url=team_picture_url
         )
         db.session.add(new_team)
         db.session.commit()

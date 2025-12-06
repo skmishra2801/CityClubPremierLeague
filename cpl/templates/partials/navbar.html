@@ -2,26 +2,27 @@
 <style>
     body {
         padding-top: 70px; /* offset for fixed navbar height */
-      }
-      .navbar-brand img {
-        height: 40px; /* adjust logo size */
+    }
+    .navbar-brand img {
+        height: 40px;
         margin-right: 10px;
-      }
-      .navbar {
-        background: linear-gradient(90deg, #0d6efd, #6610f2); /* nice gradient */
-      }
-      .navbar .nav-link {
+    }
+    .navbar {
+        background: linear-gradient(90deg, #0d6efd, #6610f2);
+    }
+    .navbar .nav-link {
         color: #fff !important;
         font-weight: 500;
         margin-left: 15px;
-      }
-      .navbar .nav-link:hover {
-        color: #ffc107 !important; /* accent hover */
-      }
+    }
+    .navbar .nav-link:hover {
+        color: #ffc107 !important;
+    }
 </style>
+
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
-        <!-- Logo + Brand -->
+        <!-- Brand/Logo -->
         <a class="navbar-brand d-flex align-items-center text-white" href="{{ url_for('main.home') }}">
             <img src="{{ url_for('static', filename='image/CPL Logo.png') }}" alt="Logo">
             <span>City Club Premier League</span>
@@ -32,57 +33,49 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Menu items aligned right -->
+        <!-- Navbar links -->
         <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
             <ul class="navbar-nav">
+
+                <!-- Public links -->
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('players.list_players') }}">Players</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('auction.auction_page') }}">Auction</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('matches.fixtures') }}">Fixtures</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('matches.results') }}">Results</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('stats.points_table') }}">Points Table</a>
-                </li>
+<!--                <li class="nav-item"><a class="nav-link" href="{{ url_for('matches.results') }}">Results</a></li>-->
+<!--                <li class="nav-item"><a class="nav-link" href="{{ url_for('stats.points_table') }}">Points Table</a></li>-->
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('teams.list_teams') }}">Teams</a></li>
-                <li class="nav-item"><a class="nav-link"
-                                        href="{{ url_for('scoreboard.scoreboard_page') }}">Scoreboard</a></li>
-<!--                <li>-->
-<!--                    <a href="{{ url_for('teams.init_balances') }}" class="btn btn-warning">-->
-<!--                        Initialize Team Balances-->
-<!--                    </a>-->
-<!--                </li>-->
-                <!-- Example of admin-only public button (only admin sees this) -->
-                {% if session.get('is_admin') %}
-                <li class="nav-item">
-                    <a href="{{ url_for('teams.init_balances') }}" class="btn btn-warning ms-2">
-                        Initialize Team Balances
-                    </a>
-                </li>
-                {% endif %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('scoreboard.scoreboard_page') }}">Scoreboard</a></li>
 
-                <!-- ADMIN SECTION -->
+                <!-- Admin-only buttons -->
                 {% if session.get('is_admin') %}
-                    <!-- Show these ONLY when admin is logged in -->
+                    <li class="nav-item ms-2">
+                        <a href="{{ url_for('teams.init_balances') }}" class="btn btn-warning">
+                            Initialize Team Balances
+                        </a>
+                    </li>
+
                     <li class="nav-item ms-3">
                         <a class="nav-link text-warning fw-bold" href="{{ url_for('admin.login') }}">
                             Admin Panel
                         </a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link text-danger fw-bold" href="{{ url_for('admin.logout') }}">
                             Logout
                         </a>
                     </li>
-
                 {% else %}
-                    <!-- Show this ONLY when admin NOT logged in -->
+                    <!-- Admin login button -->
                     <li class="nav-item ms-3">
                         <a class="nav-link text-info fw-bold" href="{{ url_for('admin.login') }}">
                             Admin Login
                         </a>
                     </li>
                 {% endif %}
-
-            </ul>
             </ul>
         </div>
     </div>
 </nav>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -10,8 +10,11 @@
       <label class="form-label small">Season</label>
       <select class="form-select" name="season">
         <option value="">All</option>
-        {% for s in seasons %}
-        <option value="{{ s }}" {% if selected_season==s %}selected{% endif %}>{{ s }}</option>
+        {% for season in seasons %}
+        <option value="{{ season.year }}" {% if selected_season and season.year== selected_season.year %}selected{%
+                    endif %}>
+                {{ season.year }}
+        </option>
         {% endfor %}
       </select>
     </div>
@@ -25,37 +28,43 @@
     <table class="table table-striped align-middle">
       <thead>
         <tr>
+          <th>POS</th>
           <th>Team</th>
           <th>M</th>
           <th>W</th>
           <th>L</th>
           <th>T</th>
-          <th>NR</th>
           <th>Pts</th>
           <th>NRR</th>
+          <th>Recent Form</th>
         </tr>
       </thead>
       <tbody>
         {% for row in standings %}
         <tr>
-          <td>{{ row.team.short_code }}</td>
-          <td>{{ row.matches }}</td>
-          <td>{{ row.wins }}</td>
-          <td>{{ row.losses }}</td>
-          <td>{{ row.ties }}</td>
-          <td>{{ row.nr }}</td>
-          <td>{{ row.points }}</td>
+          <td>{{ row.POS }}</td>
+          <td>{{ row.team }}</td>
+          <td>{{ row.P }}</td>
+          <td>{{ row.W }}</td>
+          <td>{{ row.L }}</td>
+          <td>{{ row.T }}</td>
+          <td>{{ row.PTS }}</td>
+          <td>{{ "%+.2f"|format(row.NRR) }}</td>
           <td>
-            {% if row.nrr %}
-              {{ "%+.2f"|format(row.nrr) }}
-            {% else %}
-              0.00
-            {% endif %}
+            {% for result in row.recent_form.split() %}
+              <span class="badge
+                {% if result == 'W' %} bg-success
+                {% elif result == 'L' %} bg-danger
+                {% else %} bg-secondary
+                {% endif %}">
+                {{ result }}
+              </span>
+            {% endfor %}
           </td>
         </tr>
         {% else %}
         <tr>
-          <td colspan="8" class="text-center text-muted">No standings available</td>
+          <td colspan="9" class="text-center text-muted">No standings available</td>
         </tr>
         {% endfor %}
       </tbody>

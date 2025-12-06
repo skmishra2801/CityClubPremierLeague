@@ -4,84 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>City Club Premier League | Home</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        :root { --muted: #6c757d; }
+
         .teams-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-    .team-card {
-      background: #fff;
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .team-card .logo img {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
-    }
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .team-card {
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .team-card .logo img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
         .matches-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  font-family: 'Segoe UI', sans-serif;
-}
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-.matches-table thead {
-  background-color: #007bff; /* Blue header */
-  color: white;
-}
+        .matches-table thead {
+            background-color: #007bff;
+            color: white;
+        }
 
-.matches-table thead th {
-  padding: 12px;
-  text-align: left;
-  font-weight: bold;
-  border-bottom: 2px solid #dee2e6;
-}
+        .matches-table thead th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
 
-.matches-table tbody td {
-  padding: 10px;
-  border-bottom: 1px solid #dee2e6;
-  background-color: #f9f9f9;
-}
+        .matches-table tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f9f9f9;
+        }
 
-.matches-table tbody tr:last-child td {
-  border-bottom: none;
-}
+        .matches-table tbody tr:hover td {
+            background-color: #eef6ff;
+        }
 
-.matches-table tbody tr:hover td {
-  background-color: #eef6ff;
-}
+        .blink-red {
+            color: red;
+            animation: blink 1s infinite;
+        }
 
-
-
+        @keyframes blink {
+            0% {opacity: 1;}
+            50% {opacity: 0;}
+            100% {opacity: 1;}
+        }
     </style>
 </head>
+
 <body>
 
 {% include "partials/navbar.html" %}
+
 {% if is_admin %}
-    <p>Welcome Admin!</p>
+<p class="blink-red text-center">Welcome Admin!</p>
 {% else %}
-    <p>Welcome Guest! Limited Access</p>
+<p class="blink-red text-center">Welcome Guest! Limited Access</p>
 {% endif %}
-<section class="teams-section container" id="teams">
-    <br>
+<section class="container mt-4">
+    <form method="get" action="{{ url_for('main.home') }}" class="mb-3">
+        <label for="seasonSelect" class="form-label">Select Season:</label>
+        <select id="seasonSelect" name="year" class="form-select bg-dark text-white" onchange="this.form.submit()">
+            {% for season in seasons %}
+            <option value="{{ season.year }}" {% if selected_season and season.year== selected_season.year %}selected{%
+                    endif %}>
+                {{ season.year }}
+            </option>
+            {% endfor %}
+        </select>
+    </form>
+</section>
+<section class="container mt-4">
     <div class="teams-grid">
-        {% for team in teams.values() %}
-        <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="team-card"
-           style="border-top:4px solid #005daa">
+        {% for team in allteams %}
+        <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="team-card">
             <div class="logo">
-                <img src="{{ team.logo_url or url_for('static', filename='image/default.png') }}" alt="{{ team.name }}">
+                <img src="{{ team.team_picture_url or url_for('static', filename='image/default.png') }}"
+                     alt="{{ team.name }}">
             </div>
             <div>
                 <div style="font-weight:700">{{ team.name }}</div>
@@ -92,10 +115,11 @@
     </div>
 </section>
 
-<!--Auction Details-->
-<section class="teams-section container" id="auction">
-    <h2 style="margin:18px 0 12px;color:blue">Auction Details</h2>
-    <table class="matches-table" aria-describedby="auction">
+
+<!-- AUCTION TABLE -->
+<section class="container mt-5">
+    <h2 class="mb-2 text-primary">Auction Details</h2>
+    <table class="matches-table">
         <thead>
         <tr>
             <th>Team</th>
@@ -103,7 +127,7 @@
             <th>Spent Amount</th>
             <th>Available Balance</th>
             <th>Max Players</th>
-            <th>No of Players</th>
+            <th>No. of Players</th>
             <th>Risk Metric</th>
         </tr>
         </thead>
@@ -114,64 +138,59 @@
             <td>{{ team.openingbalance }}</td>
             <td>{{ team.spentamount }}</td>
             <td {% if team.balance
-            <= 200 %}style="color: red;"{% endif %}>{{ team.balance }}</td>
-            <td>{{team.maxplayers}}</td>
-            <td>{{ team.players }}</td>
-            <td {% if team[
-            'calculate'] is not none and team['calculate'] < 200 %}style="color:red;"{% endif %}>
-            {% if team['calculate'] is not none %}
-            {{ "%.2f"|format(team['calculate']) }}
+            <= 200 %}style="color:red;font-weight:bold"{% endif %}>
+            {{ team.balance }}
+            </td>
+            <td>{{ team.maxplayers }}</td>
+            <td>{{ team.players_bought }}</td>
+            <td {% if team.calculate is not none and team.calculate
+            < 200 %}style="color:red;font-weight:bold"{% endif %}>
+            {% if team.calculate %}
+            {{ "%.2f"|format(team.calculate) }}
             {% else %}
-            N/A
+            0.00
             {% endif %}
             </td>
-
-
         </tr>
         {% endfor %}
         </tbody>
     </table>
 </section>
-<!--Leader Board-->
-<section class="teams-section container" id="leaderboard">
-    <h2 style="margin:18px 0 12px;color:blue">Leader Board</h2>
-    <table class="matches-table" aria-describedby="leaderboard">
+
+
+<!-- LEADERBOARD -->
+<section class="container mt-5">
+    <h2 class="mb-2 text-primary">Leader Board</h2>
+    <table class="matches-table">
         <thead>
         <tr>
-            <th>POS</th>
-            <th>TEAM</th>
-            <th>P</th>
-            <th>W</th>
-            <th>L</th>
-            <th>PTS</th>
-            <th>RECENT FORM</th>
+            <th scope="col">POS</th>
+            <th scope="col">TEAM</th>
+            <th scope="col">P</th>
+            <th scope="col">W</th>
+            <th scope="col">L</th>
+            <th scope="col">PTS</th>
+            <th scope="col">RECENT FORM</th>
         </tr>
         </thead>
         <tbody>
         {% for t in leaderboard %}
         <tr>
             <td>{{ t.POS }}</td>
-            <td>{{ t.team }}</td>
+            <td class="fw-bold">{{ t.team }}</td>
             <td>{{ t.P }}</td>
             <td>{{ t.W }}</td>
             <td>{{ t.L }}</td>
-            <td>{{ t.PTS }}</td>
+            <td class="fw-bold">{{ t.PTS }}</td>
             <td>
                 {% for result in t.recent_form.split() %}
-                <span style="
-                        display: inline-block;
-                        width: 22px;
-                        height: 22px;
-                        line-height: 22px;
-                        text-align: center;
-                        margin: 2px;
-                        border-radius: 4px;
-                        font-weight: bold;
-                        color: white;
-                        background-color:
-                        {% if result == 'W' %}#28a745{% elif result == 'L' %}#dc3545{% else %}#6c757d{% endif %};">
-                    {{ result }}
-                </span>
+                <span class="badge
+                            {% if result == 'W' %} bg-success
+                            {% elif result == 'L' %} bg-danger
+                            {% else %} bg-secondary
+                            {% endif %}">
+                            {{ result }}
+                        </span>
                 {% endfor %}
             </td>
         </tr>
@@ -180,8 +199,40 @@
     </table>
 </section>
 
-<!-- Bootstrap JS -->
+
+<!-- LATEST MATCHES -->
+<!-- LATEST MATCHES -->
+<section class="container mt-5">
+    <h2 class="mb-2 text-primary">Latest Matches - {{ selected_season.year }}</h2>
+
+    <table class="matches-table">
+        <thead>
+        <tr>
+            <th>Match Title</th>
+            <th>Date</th>
+            <th>Venue</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for match in matches %}
+        <tr>
+            <td>
+
+                {{ match.team_a.name }} vs {{ match.team_b.name }}
+
+            </td>
+            <td>{{ match.match_date.strftime("%d-%m-%Y") }}</td>
+            <td>{{ match.venue }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+
+{% include "partials/footer.html" %}
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
-

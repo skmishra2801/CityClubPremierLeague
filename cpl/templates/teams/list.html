@@ -1,55 +1,66 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-  body {
-    padding-top: 100px; /* offset for fixed navbar + button */
-  }
-  .fixed-add-btn {
-    position: fixed;
-    top: 70px; /* adjust based on navbar height */
-    right: 20px;
-    z-index: 1030; /* keep above table */
-  }
+    body {
+      padding-top: 100px; /* offset for fixed navbar + button */
+    }
+    .fixed-add-btn {
+      position: fixed;
+      top: 70px; /* adjust based on navbar height */
+      right: 20px;
+      z-index: 1030; /* keep above table */
+    }
 </style>
 {% extends "layouts/base.html" %}
 {% block title %}Teams{% endblock %}
 {% block content %}
 
 <div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h4 m-0">Teams</h1>
-  <a href="{{ url_for('teams.add_team') }}" class="btn btn-primary btn-sm fixed-add-btn">
-    + Add Team
-  </a>
+    <h1 class="h4 m-0">Teams</h1>
+    <a href="{{ url_for('teams.add_team') }}" class="btn btn-primary btn-sm fixed-add-btn">
+        + Add Team
+    </a>
 </div>
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-  {% if teams %}
+<form method="get" class="mb-3">
+    <label class="form-label text-white fw-bold">Select Season</label>
+    <select name="year" class="form-select bg-dark text-white" onchange="this.form.submit()">
+        {% for y in years %}
+        <option value="{{ y }}" {% if y== selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<!--<div class="row row-cols-1 row-cols-md-3 g-4">-->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+
+    {% if teams %}
     {% for team in teams %}
     <div class="col">
-      <div class="card h-100">
-        {% if team.logo_url %}
-        <img src="{{ team.logo_url }}" class="card-img-top" alt="{{ team.name }}">
-        {% endif %}
-        <div class="card-body">
-          <h5 class="card-title">{{ team.name }}</h5>
-          <p class="card-text mb-2">
-            <strong>Code:</strong> {{ team.short_code or "N/A" }}<br>
-            <strong>City:</strong> {{ team.city or "N/A" }}<br>
-            <strong>Coach:</strong> {{ team.coach or "N/A" }}
-          </p>
-          <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="btn btn-outline-secondary btn-sm">
-            View Team
-          </a>
+        <div class="card h-100">
+            {% if team.team_picture_url %}
+            <img src="{{ team.team_picture_url }}" class="card-img-top" alt="{{ team.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ team.name }}</h5>
+                <p class="card-text mb-2">
+                    <strong>Code:</strong> {{ team.short_code or "N/A" }}<br>
+                    <strong>City:</strong> {{ team.city or "N/A" }}<br>
+                    <strong>Coach:</strong> {{ team.coach or "N/A" }}
+                </p>
+                <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="btn btn-outline-secondary btn-sm">
+                    View Team
+                </a>
+            </div>
         </div>
-      </div>
     </div>
     {% endfor %}
-  {% else %}
+    {% else %}
     <div class="col-12">
-      <div class="alert alert-info">
-        No teams found. Click "Add Team" to create one.
-      </div>
+        <div class="alert alert-info">
+            No teams found. Click "Add Team" to create one.
+        </div>
     </div>
-  {% endif %}
+    {% endif %}
 </div>
 
 {% endblock %}
