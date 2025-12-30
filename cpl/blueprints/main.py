@@ -41,7 +41,10 @@ def home():
         allteams = Team.query.filter(Team.id.in_(team_ids)).all()
 
     # Build a dict of all teams for quick lookup and purse section
-    teams_dict = {t.id: t for t in Team.query.all()}
+    # teams_dict = {t.id: t for t in Team.query.all()}
+    # Build a dict of only the teams for the selected season
+    teams_dict = {t.id: t for t in allteams} if allteams else {}
+
     # -------------------------
     # LATEST MATCHES
     # -------------------------

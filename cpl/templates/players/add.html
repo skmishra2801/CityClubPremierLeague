@@ -40,13 +40,19 @@
           <option value="XL">XXXL</option>
         </select>
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Payment Status</label>
-        <select name="payment_status" class="form-select">
-          <option value="Pending">Pending</option>
-          <option value="Paid">Paid</option>
-        </select>
-      </div>
+<!--      <div class="col-md-6">-->
+<!--        <label class="form-label">Payment Status</label>-->
+<!--        <select name="payment_status" class="form-select">-->
+<!--          <option value="Pending">Pending</option>-->
+<!--          <option value="Paid">Paid</option>-->
+<!--        </select>-->
+<!--      </div>-->
+          <div class="col-md-6 d-none">
+              <label class="form-label">Payment Status</label>
+              <select name="payment_status" class="form-select">
+                  <option value="Pending">Pending</option>
+                  <option value="Paid">Paid</option> </select>
+          </div>
       <div class="col-12">
         <button type="submit" class="btn btn-primary">Add Player</button>
         <a href="{{ url_for('main.home') }}" class="btn btn-secondary">Cancel</a>
