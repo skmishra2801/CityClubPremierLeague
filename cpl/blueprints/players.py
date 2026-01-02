@@ -56,59 +56,124 @@ def list_players():
 # -----------------------------------------------------
 # ADD PLAYER
 # -----------------------------------------------------
+# @bp.route("/add", methods=["GET", "POST"])
+# def add_player():
+#     if request.method == "POST":
+#         name = request.form["name"]
+#         role = request.form["role"]
+#         jersey_number = request.form.get("jersey_number")
+#         jersey_size = request.form.get("jersey_size")
+#         payment_status = request.form.get("payment_status")
+#
+#         team_id = request.form.get("team_id")
+#         team_id = int(team_id) if team_id and team_id.isdigit() else None
+#
+#         season_year = request.form.get("season_year")
+#
+#         # Upload photo
+#         photo_url = None
+#         photo_file = request.files.get("photo")
+#         if photo_file and photo_file.filename:
+#             upload_result = cloudinary.uploader.upload(photo_file)
+#             photo_url = upload_result.get("secure_url")
+#
+#         # Create Player (base details only)
+#         new_player = Player(
+#             name=name,
+#             role=role,
+#             jersey_number=jersey_number,
+#             jersey_size=jersey_size,
+#             payment_status=payment_status,
+#             photo_url=photo_url
+#         )
+#         db.session.add(new_player)
+#         db.session.commit()  # commit to get player.id
+#
+#         # Create PlayerSeason row
+#         if season_year:
+#             season = Season.query.filter_by(year=int(season_year)).first()
+#
+#             if season:
+#                 ps = PlayerSeason(
+#                     season_id=season.id,
+#                     player_id=new_player.id,
+#                     team_id=team_id  # can be None if unassigned
+#                 )
+#                 db.session.add(ps)
+#                 db.session.commit()
+#
+#         flash("Player added successfully!", "success")
+#         return redirect(url_for("players.list_players"))
+#
+#     teams = Team.query.all()
+#     seasons = Season.query.order_by(Season.year.desc()).all()
+#
+#     return render_template("players/add.html", teams=teams, seasons=seasons)
+
 @bp.route("/add", methods=["GET", "POST"])
 def add_player():
     if request.method == "POST":
-        name = request.form["name"]
-        role = request.form["role"]
-        jersey_number = request.form.get("jersey_number")
-        jersey_size = request.form.get("jersey_size")
-        payment_status = request.form.get("payment_status")
+        # Collect form data but don't commit yet
+        form_data = {
+            "name": request.form["name"],
+            "role": request.form["role"],
+            "jersey_number": request.form.get("jersey_number"),
+            "jersey_size": request.form.get("jersey_size"),
+            "payment_status": request.form.get("payment_status"),
+            "team_id": request.form.get("team_id"),
+            "season_year": request.form.get("season_year"),
+        }
 
-        team_id = request.form.get("team_id")
-        team_id = int(team_id) if team_id and team_id.isdigit() else None
-
-        season_year = request.form.get("season_year")
-
-        # Upload photo
-        photo_url = None
+        # Handle photo upload temporarily (optional: store in session)
         photo_file = request.files.get("photo")
+        photo_url = None
         if photo_file and photo_file.filename:
             upload_result = cloudinary.uploader.upload(photo_file)
             photo_url = upload_result.get("secure_url")
+        form_data["photo_url"] = photo_url
 
-        # Create Player (base details only)
-        new_player = Player(
-            name=name,
-            role=role,
-            jersey_number=jersey_number,
-            jersey_size=jersey_size,
-            payment_status=payment_status,
-            photo_url=photo_url
-        )
-        db.session.add(new_player)
-        db.session.commit()  # commit to get player.id
-
-        # Create PlayerSeason row
-        if season_year:
-            season = Season.query.filter_by(year=int(season_year)).first()
-
-            if season:
-                ps = PlayerSeason(
-                    season_id=season.id,
-                    player_id=new_player.id,
-                    team_id=team_id  # can be None if unassigned
-                )
-                db.session.add(ps)
-                db.session.commit()
-
-        flash("Player added successfully!", "success")
-        return redirect(url_for("players.list_players"))
+        # Render preview template
+        return render_template("players/preview.html", data=form_data)
 
     teams = Team.query.all()
     seasons = Season.query.order_by(Season.year.desc()).all()
-
     return render_template("players/add.html", teams=teams, seasons=seasons)
+
+
+@bp.route("/confirm_add", methods=["POST"])
+def confirm_add():
+    name = request.form["name"]
+    role = request.form["role"]
+    jersey_number = request.form.get("jersey_number")
+    jersey_size = request.form.get("jersey_size")
+    payment_status = request.form.get("payment_status")
+    team_id = request.form.get("team_id")
+    team_id = int(team_id) if team_id and team_id.isdigit() else None
+    photo_url = request.form.get("photo_url")
+
+    # Create Player
+    new_player = Player(
+        name=name,
+        role=role,
+        jersey_number=jersey_number,
+        jersey_size=jersey_size,
+        payment_status=payment_status,
+        photo_url=photo_url
+    )
+    db.session.add(new_player)
+    db.session.commit()
+
+    # Create PlayerSeason row only if team_id is provided
+    if team_id:
+        ps = PlayerSeason(
+            player_id=new_player.id,
+            team_id=team_id
+        )
+        db.session.add(ps)
+        db.session.commit()
+
+    flash("Player added successfully!", "success")
+    return redirect(url_for("players.list_players"))
 
 
 # -----------------------------------------------------

@@ -1,0 +1,27 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Preview Player{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <h1 class="h5 mb-4">Preview Player Details</h1>
+  <ul class="list-group mb-3">
+    <li class="list-group-item"><strong>Name:</strong> {{ data.name }}</li>
+    <li class="list-group-item"><strong>Role:</strong> {{ data.role }}</li>
+    <li class="list-group-item"><strong>Jersey Number:</strong> {{ data.jersey_number }}</li>
+    <li class="list-group-item"><strong>Jersey Size:</strong> {{ data.jersey_size }}</li>
+    {% if data.photo_url %}
+      <li class="list-group-item"><strong>Photo:</strong><br>
+        <img src="{{ data.photo_url }}" alt="Player photo" class="img-thumbnail" style="max-width:200px;">
+      </li>
+    {% endif %}
+  </ul>
+
+  <form method="POST" action="{{ url_for('players.confirm_add') }}">
+    {% for key, value in data.items() %}
+      <input type="hidden" name="{{ key }}" value="{{ value }}">
+    {% endfor %}
+    <button type="submit" class="btn btn-success">Confirm & Add Player</button>
+    <a href="{{ url_for('players.add_player') }}" class="btn btn-secondary">Edit</a>
+  </form>
+</div>
+{% endblock %}
