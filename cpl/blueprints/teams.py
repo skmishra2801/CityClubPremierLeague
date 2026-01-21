@@ -112,6 +112,66 @@ def team_detail(team_id):
         selected_year=selected_year
     )
 
+from flask import Response
+import pandas as pd
+import io
+
+@bp.route("/<int:team_id>/export")
+def export_team_players(team_id):
+    team = Team.query.get_or_404(team_id)
+
+    # Selected year from query params
+    selected_year = request.args.get("year", type=int)
+
+    # Default year = latest season
+    season_obj = None
+    if selected_year:
+        season_obj = Season.query.filter_by(year=selected_year).first()
+    else:
+        season_obj = Season.query.order_by(Season.year.desc()).first()
+        selected_year = season_obj.year if season_obj else None
+
+    players = []
+    if season_obj:
+        ps_rows = PlayerSeason.query.filter_by(
+            team_id=team.id,
+            season_id=season_obj.id
+        ).all()
+
+        player_ids = [ps.player_id for ps in ps_rows]
+        players = Player.query.filter(Player.id.in_(player_ids)).all()
+
+    # Build data for Excel
+    data = []
+    for player in players:
+        # Assuming PlayerSeason has jersey_number and jersey_size
+        ps = next((row for row in ps_rows if row.player_id == player.id), None)
+        data.append({
+            "TeamName": team.name,
+            "PlayerName": player.name,
+            "Role": player.role,
+            "JerseyNumber": player.jersey_number if player else "",
+            "JerseySize": player.jersey_size if player else ""
+        })
+
+    df = pd.DataFrame(data)
+
+    # Write to Excel in memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Players")
+
+    output.seek(0)
+
+    return Response(
+        output.getvalue(),
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment;filename={team.name}_{selected_year}_players.xlsx"
+        }
+    )
+
+
 @bp.route("/add", methods=["GET", "POST"])
 @admin_required
 def add_team():

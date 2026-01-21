@@ -12,9 +12,9 @@
     <div>
       <h1 class="h4 mb-1">
         {{ team.name }}
-        <small class="text-white">({{ team.short_code }})</small>
+        <small class="text-black">({{ team.short_code }})</small>
       </h1>
-      <div class="small text-white">
+      <div class="small text-black">
         {{ team.city }}
         {% if team.founded %} · Founded {{ team.founded }}{% endif %}
         {% if team.coach %} · Coach: {{ team.coach }}{% endif %}
@@ -24,7 +24,7 @@
 
   <!-- YEAR SELECTOR -->
   <form method="get" class="mb-3">
-    <label class="form-label text-white fw-bold">Select Season</label>
+    <label class="form-label text-blue fw-bold">Select Season</label>
     <select name="year" class="form-select bg-dark text-white" onchange="this.form.submit()">
       {% for y in years %}
         <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
@@ -32,9 +32,14 @@
     </select>
   </form>
 
-  <h2 class="h5 mb-3 text-white">
+  <h2 class="h5 mb-3 text-black">
     Players – {{ selected_year }}
   </h2>
+<a href="{{ url_for('teams.export_team_players', team_id=team.id, year=selected_year) }}"
+   class="btn btn-success mb-3">
+   Export Players to Excel
+</a>
+
 
   {% if players %}
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
