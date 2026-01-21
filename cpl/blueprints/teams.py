@@ -4,11 +4,12 @@ from cpl.blueprints.admin import admin_required
 from cpl.models import Team, Match, PointsTable, TeamBalance, PlayerSeason, Player, Season
 from extensions import db
 import cloudinary.uploader
+from flask import Response
+import pandas as pd
+import io
+from sqlalchemy import distinct
 
 bp = Blueprint("teams", __name__, url_prefix="/teams")
-
-
-from sqlalchemy import distinct
 
 @bp.route("/season/<int:season_id>")
 def season_teams(season_id):
@@ -112,9 +113,7 @@ def team_detail(team_id):
         selected_year=selected_year
     )
 
-from flask import Response
-import pandas as pd
-import io
+
 
 @bp.route("/<int:team_id>/export")
 def export_team_players(team_id):
