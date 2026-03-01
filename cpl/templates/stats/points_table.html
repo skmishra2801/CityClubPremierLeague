@@ -1,74 +1,501 @@
 {% extends 'layouts/base.html' %}
-{% block title %}League | Points Table{% endblock %}
-
+{% block title %}Point Table{% endblock %}
 {% block content %}
-<div class="container my-4">
-  <h1 class="h4 mb-3">Points Table</h1>
+<style>
+    .matches-tabs {
+    margin-bottom: 20px; /* adjust as needed */
+    z-index: 2;          /* keep tabs above background */
+}
 
-  <form class="row g-3 align-items-end mb-4" method="get">
-    <div class="col-12 col-md-3">
-      <label class="form-label small">Season</label>
-      <select class="form-select" name="season">
-        <option value="">All</option>
-        {% for season in seasons %}
-        <option value="{{ season.year }}" {% if selected_season and season.year== selected_season.year %}selected{%
-                    endif %}>
-                {{ season.year }}
-        </option>
-        {% endfor %}
-      </select>
+</style>
+<body>
+<div ng-app="MyApp">
+    <div class="ap-main-header col-100 floatLft flexDisplay justifyCenter auction-session-bottom-line mb-0 py-1"
+         style="z-index:99999;">
+        <ul class="year-auction nav">
+            {% for year in years %}
+            <li class="{% if year == selected_year %}active{% endif %}">
+                <a class="{% if year == selected_year %}active show{% endif %}"
+                   href="{{ url_for('stats.points_table', year=year) }}">
+                    {{ year }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
-    <div class="col-12 col-md-3 d-flex gap-2">
-      <button type="submit" class="btn btn-primary">Apply</button>
-      <a href="{{ url_for('stats.points_table') }}" class="btn btn-secondary">Reset</a>
-    </div>
-  </form>
+    <div class="w-100 floatLft">
+        <div class="matches-main position-relative">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="matches-title">MATCHES</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <div class="table-responsive">
-    <table class="table table-striped align-middle">
-      <thead>
-        <tr>
-          <th>POS</th>
-          <th>Team</th>
-          <th>M</th>
-          <th>W</th>
-          <th>L</th>
-          <th>T</th>
-          <th>Pts</th>
-          <th>NRR</th>
-          <th>Recent Form</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in standings %}
-        <tr>
-          <td>{{ row.POS }}</td>
-          <td>{{ row.team }}</td>
-          <td>{{ row.P }}</td>
-          <td>{{ row.W }}</td>
-          <td>{{ row.L }}</td>
-          <td>{{ row.T }}</td>
-          <td>{{ row.PTS }}</td>
-          <td>{{ "%+.2f"|format(row.NRR) }}</td>
-          <td>
-            {% for result in row.recent_form.split() %}
-              <span class="badge
+        <div class="matches-tabs position-relative">
+            <ul class="nav nav-pills" id="matchesTabs">
+                <li class="nav-item">
+                    <a href="{{ url_for('matches.fixtures') }}" class="nav-link  active ">RESULTS</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('stats.points_table') }}" class="nav-link ">POINTS TABLE</a>
+                </li>
+<!--                <li class="nav-item">-->
+<!--                    <a href="#" class="nav-link ">PLAYOFFS</a>-->
+<!--                </li>-->
+            </ul>
+        </div>
+        <span></span>
+
+        <div class="ih-pt-tab-bg p-0">
+            <div class="ih-pcard-wrap">
+                    <table width="100%" class="ih-td-tab">
+                        <thead>
+                        <tr class="ih-pt-tbl" style="display:revert;">
+                            <th>POS</th>
+                            <th>Team</th>
+                            <th>M</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>T</th>
+                            <th>Pts</th>
+                            <th>NRR</th>
+                            <th>Recent Form</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in standings %}
+                        <tr class="ih-pt-tbl" style="display:revert;">
+                            <td>{{ row.POS }}</td>
+                            <td>{{ row.team }}</td>
+                            <td>{{ row.P }}</td>
+                            <td>{{ row.W }}</td>
+                            <td>{{ row.L }}</td>
+                            <td>{{ row.T }}</td>
+                            <td>{{ row.PTS }}</td>
+                            <td>{{ "%+.2f"|format(row.NRR) }}</td>
+                            <td>
+                                {% for result in row.recent_form.split() %}
+                                <span class="badge
                 {% if result == 'W' %} bg-success
                 {% elif result == 'L' %} bg-danger
                 {% else %} bg-secondary
                 {% endif %}">
                 {{ result }}
               </span>
-            {% endfor %}
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="9" class="text-center text-muted">No standings available</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center text-muted">No standings available</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+
+<!--sponsor logo start section -->
+</div>
+<div class="cookie d-none ">
+    <div>
+        <a class="cookie__link" href="http://www.allaboutcookies.org/"
+           title="Learn all about cookies and why sites use them" target="_blank">What are cookies?</a>
+        <br>
+        <p class="cookie__message">We and selected third parties use cookies or similar technologies for technical
+            purposes and, with your consent, for other purposes as specified in the <a target="_blank"
+                                                                                       href="https://www.iplt20.com/cookie-policy">cookie
+                policy.</a></p>
+        <button class="cookie__accept cookie__accept_btn">Accept cookies</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $(".SMbriefScoreWidget").hide();
+        $(".ap-copy").css("paddingBottom","15px");
+
+        function isCookieSet() {
+          // Replace 'your_cookie_name' with the actual name of your session cookie
+          return document.cookie.indexOf('username') !== -1;
+        }
+
+        if (!isCookieSet()) {
+            // Cookie is not set, hide the content
+            $('.cookie').removeClass('d-none');
+          }else{
+            $('.cookie').addClass('d-none');
+          }
+     })
+</script>
+
+
+<script>
+    $('.playoff_dd').change(function(){
+        $.ajax({
+            url: "/getBracketFixture?year="+$('.playoff_dd').val(),
+            type: "GET",
+            success: function (response) {
+                if (response.status) {
+                    $(".brackets-inside").html(response.html);
+                }
+            },
+            error: function (response) { }
+        })
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js"
+        integrity="sha512-q583ppKrCRc7N5O0n2nzUiJ+suUv7Et1JGels4bXOaMFQcamPk9HjdUknZuuFjBNs7tsMuadge5k9RzdmO+1GQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+
+
+<div id="top"></div>
+<!-- ////////////// Brightcove player Model START //////////////////// -->
+<div class="modal fade vid-popup" id="exampleModal" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="ap-vd-pop-container col-100 floatLft" style="max-width:1600px;margin: 0 auto;">
+
+                <div class="ap-vd-pop-inner col-100 floatLft relative d-flex">
+
+                    <a href="javascript:;"
+                       class="ap-vd-pop-close close absolute close_cross_button closeplayer main-vid-close"
+                       data-bs-dismiss="modal" aria-label="Close"><img
+                            src="https://documents.iplt20.com//ipl/assets/images/ap-close-pop-vd.png" alt=""></a>
+                    <div class="ap-vd-wrp col-100 floatLft flexDisplay justifySpace alignStart flexWrap">
+                        <div id="#gtt" tabindex='1'></div>
+                        <div class="ap-video-list-wrp ap-common-sroll">
+
+                            <div class="ap-vd-iframe col-100 floatLft modal-body p-0">
+                                <!--start player -->
+                                <div>
+                                    <video-js id="myPlayers" data-account="3588749423001" data-video-id=""
+                                              data-player="default" data-embed="default" controls="true" autoplay
+                                              data-tracker-type="VIDEO" data-tracker-action="VIEW"
+                                              data-application-id="" class="vjs-fluid"></video-js>
+                                </div>
+                                <script src="//players.brightcove.net/3588749423001/default_default/index.min.js">
+                                </script>
+                                <div class="vjs-playlist"></div>
+                                <!-- <video ref="Player" id="ipl-player" class="video-js vjs-big-play-centered vjs-show-big-play-button-on-pause" controls preload="auto" width="850" height="430" data-setup='{"playbackRates": [0.5, 1, 1.5, 2] }'></video> -->
+                                <!--end player -->
+
+
+                                <div class="new-video-social col-100 floatLft textLeft">
+                                    <div class="popuptitle w-100"></div>
+                                    <div class="w-100 d-flex flex-wrap">
+                                        <div class="type-date-time d-flex justify-content-between">
+                                            <p class="d-flex align-items-center">
+                                                <span class="d-flex align-items-center me-2 popupdate"></span>|<img
+                                                    src="https://documents.iplt20.com//ipl/assets/images/new-eye.svg"
+                                                    class="mx-2" alt=""><span class="popupview me-2">0</span>|
+                                                <span class="d-flex align-items-center mx-2 videopageduration">
+                                                    </span>
+                                            </p>
+                                        </div>
+                                        <div class="new-video-share">
+                                            <span class="me-2">Share video on :</span>
+                                            <a onclick="share(this)" data-title="" data-type="video"
+                                               data-method="whatsapp" class="whatsapp" href="zdasjavascript:void(0);"
+                                               class="bg-transparent border-0 mx-3" tabindex="0" target="_blank"
+                                               data-action="share/whatsapp/share">
+                                                <i class="fa">&#xf232;</i>
+                                            </a>
+                                            <a onclick="share(this)" data-title="" data-type="video"
+                                               data-method="facebook" href="javascript:void(0);" target="_blank"
+                                               class="js-share social-share-item__link mx-3 facebook"><i
+                                                    class="fa fa-facebook-f"></i></a>
+                                            <a onclick="share(this)" data-title="" data-type="video"
+                                               data-method="twitter" href="javascript:void(0);" target="_blank"
+                                               class="js-share social-share-item__link me-3 twitter"><i
+                                                    class="fa fa-twitter"></i></a>
+                                            <a class="copy-link copyUrl1  copyurlplay ctc" data-title=""
+                                               data-type="video" data-method="Copy link" href="javascript:void(0)"
+                                               onclick="share(this)">
+                                                <i class="fa fa-link"></i><span class="c">Copy</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="w-100 d-none">
+
+                                        <ul class="ap-navigation social-media col-100 floatLft">
+
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <!-- magic Moments slider start-->
+                            <div class="ap-wickt-slider-outer col-100 floatLft" style="display: none;">
+                                <div class="ap-common-title-wrp col-100 floatLft flexDisplay justifySpace alignCenter mb-0">
+                                    <h2 class="what-r-u-text mb-0">Magic Moments</h2>
+                                    <a href="https://www.iplt20.com/video/magic-moments" class="ap-viewall-click wht">View
+                                        All</a>
+                                </div>
+                                <div>
+                                    <div id="magicmomentVideo" class="ap-wickt-slider col-100 floatLft mb-0">
+
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- magic Moments slider end-->
+
+                            <!--Latest Videos slider start-->
+                            <div class="ap-wickt-slider-outer col-100 floatLft">
+                                <div class="ap-common-title-wrp col-100 floatLft flexDisplay justifySpace alignCenter mb-0">
+                                    <h2 class="what-r-u-text mb-0 mt-3">Related Videos</h2>
+                                    <!-- <div class="new-slide-controls d-flex align-items-center">
+                                        <a href="https://www.iplt20.com/video/all" class="me-3">See more</a>
+                                    </div> -->
+                                </div>
+                                <div>
+                                    <div id="popuplatest" class="ap-wickt-slider col-100 floatLft slick">
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <!--Latest Videos slider start-->
+
+                        </div>
+                        <div class="ap-video-scroll-list ap-common-sroll">
+                            <h1 class="what-r-u-text-3 mb-0 mt-0 text-white wrut-drk ps-3">IPL Exclusive</h1>
+                            <div class="ap-vd-scroll-div col-100 floatLft " id="relatedVideo">
+                                Loading....
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- ////////////// Brightcove player Model END //////////////////// -->
+
+<!-- ////////////// Team player Details Model START //////////////////// -->
+
+<div class="modal fade vid-popup" id="playerModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="ap-vd-pop-container col-100 floatLft">
+                <div class="ap-vd-pop-inner col-100 floatLft relative">
+                    <h1>Player Details</h1>
+                    <a href="javascript:;" class="ap-vd-pop-close close absolute close_cross_button closeplayer"
+                       data-bs-dismiss="modal" aria-label="Close"><img
+                            src="https://documents.iplt20.com//ipl/assets/images/ap-close-pop-vd.png" alt=""></a>
+                    <div class="ap-vd-wrp col-100 floatLft flexDisplay justifySpace alignStart flexWrap">
+                        <div class="ih-teams-squad-sec">
+                            <div class="ih-td-bgimg">
+
+                                <div class="ih-td-squad">
+
+                                    <div class="ih-td-tab-sec">
+                                        <div class="ih-td-tab1">
+                                            <div><strong id="plyname"></strong><a href="" target="blank"
+                                                                                  class="profileLink"><span
+                                                    class="u-hide-tablet">- Player </span>Profile »</a></div>
+                                            <table class="ih-td-tab w-100">
+                                                <tbody>
+                                                <tr>
+                                                    <th style="border-bottom:0px;">Role</th>
+                                                    <td id="plyrole">Batsman</td>
+                                                    <th style="border-bottom:0px;">Nationality</th>
+                                                    <td id="plyntn">Indian</td>
+                                                    <td rowspan="2">
+                                                        <div class="ap-plyer-img"><img id="plyimg" src="#" alt=""></div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="border-bottom:0px;">Bats</th>
+                                                    <td id="plybat"></td>
+                                                    <th style="border-bottom:0px;">Bowls</th>
+                                                    <td id="plyball" colspan="1"></td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="5"></td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="border-bottom:0px;">Bio</th>
+                                                </tr>
+                                                <tr>
+                                                    <td id="plybio" colspan="4">A 22-year old opening batsman who hails
+                                                        from Pune, Ruturaj Gaikwad has been a consistent performer for
+                                                        his state team Maharashtra. He was the highest run-getter for
+                                                        Maharashtra in the league stage of the Syed Mushtaq Ali Trophy
+                                                        2018-19. At the IPL 2019 Player Auction, the Chennai Super Kings
+                                                        secured his services at his base price of INR 20 lacs.
+                                                    </td>
+                                                    <td></td>
+
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ////////////// player Details Model END //////////////////// -->
+<script>
+    if (window.history && window.history.pushState) {
+        $('#exampleModal').on('show.bs.modal', function (e) {
+            var currentURL = window.location.href;
+            var arr=currentURL.split('/')[3];
+            if(arr=='' || arr==null || arr==undefined)
+            {
+                var mainurl=currentURL+'#';
+                window.history.pushState('forward', null, mainurl);
+            }
+        });
+
+        $(window).on('popstate', function () {
+            $('#exampleModal').modal('hide');
+            $('.closeplayer').trigger('click');
+            $('#storiesModal').modal('hide');
+            $('.closeplayerstories').trigger('click');
+        });
+    }
+
+    function copyUrlpopup(dataurl){
+           $(".ctc .c").text("Copied!");
+                var shareurl = dataurl;//$(this).attr('data-shareurl');
+                // var dummy = $('<input id="test">').val(shareurl);//.appendTo('body').select();
+                var dummy = document.createElement("input");
+                dummy.value = shareurl;
+                document.body.appendChild(dummy);
+                dummy.select();
+                dummy.focus();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+                setTimeout(
+                  function()
+                  {
+                    $(".ctc .c").text("Copy");
+                  }, 1000);
+                // document.getElementById("cl").innerHTML = "Copied !";
+        }
+     $('.copyUrl1').on('click', function() {
+                var shareurl = $(this).attr('data-shareurl');
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(shareurl).then(function() {
+                       $(".ctc .c").text("Copied!");
+                    }).catch(function(err) {
+                        console.error('Failed to copy: ', err);
+                        $(".ctc .c").text("Failed to copy!");
+                    });
+                } else {
+                    var dummy = document.createElement("input");
+                    //dummy.style.position = 'absolute';
+                    //dummy.style.left = '-9999px';
+                    dummy.value = shareurl;
+                    document.body.appendChild(dummy);
+                    dummy.select();
+                    dummy.focus();
+                    try {
+                        document.execCommand('copy');
+                        $(".ctc .c").text("Copied!");
+                    } catch (err) {
+                        console.error('Failed to copy: ', err);
+                        $(".ctc .c").text("Failed to copy!");
+                    }
+                    document.body.removeChild(dummy);
+                }
+            });
+
+
+            $('.copyUrl1').mouseout(function(){
+              $(".ctc .c").text("Copy");
+            });
+
+</script>
+<!-- ////////////// Brightcove player Model START //////////////////// -->
+<div class="modal fade vid-popup" id="storiesModal" tabindex="-1" role="dialog" data-backdrop="static"
+     data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content p-0">
+            <div class="progressBar">
+
+            </div>
+            <div class="story-modal">
+                <input type="hidden" id="mediaid" name="mediaid">
+                <a href="javascript:;"
+                   class="ap-vd-pop-close close absolute close_cross_button closeplayerstories bg-transparent"
+                   data-bs-dismiss="modal" aria-label="Close"><img
+                        src="https://documents.iplt20.com//ipl/assets/images/ap-close-pop-vd.png" alt=""></a>
+                <!-- Previous story Button -->
+                <div class="previousStoryBtn" data-is-prev="true">
+                    <!-- <img src="https://documents.iplt20.com/ipl/assets/images/story-arrow.svg" alt="arrow"> -->
+                </div>
+                <!-- Previous story Button -->
+                <div class="story-iframe">
+                    <!--start player -->
+                    <!-- <div> -->
+                    <h2 class="stories-title">Title</h2>
+                    <video-js id="myPlayersStories" data-account="3588749423001" data-video-id="" data-player="default"
+                              data-embed="default" controls="true" autoplay data-tracker-type="VIDEO"
+                              data-tracker-action="VIEW" data-application-id="" class="vjs-fluid"></video-js>
+                    <!-- </div> -->
+                    <script src="//players.brightcove.net/3588749423001/default_default/index.min.js"></script>
+                    <div class="vjs-playlist"></div>
+                    <!--end player -->
+                </div>
+                <!-- Next story button -->
+                <div class="nextStoryBtn" data-is-next="true">
+                    <!-- <img src="https://documents.iplt20.com/ipl/assets/images/story-arrow-right.svg" alt="arrow"> -->
+                </div>
+                <!-- Next Story Button -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ////////////// Brightcove player Model END //////////////////// -->
+
+<!-- Schedule Scripts -->
+<script>
+    $(document).ready(function() {
+        $(".team6").insertAfter(".team2");
+    });
+
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    const tabs = document.querySelectorAll("#matchesTabs .nav-link");
+    tabs.forEach(tab => {
+        tab.addEventListener("click", function() {
+        //e.preventDefault(); // prevent page reload if using #
+        //remove active from all
+        tabs.forEach(t => t.classList.remove("active"));
+        // add active to clicked one
+        this.classList.add("active"); }); }); });
+</script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCApp.js?v=1.22" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCConfig.js?v=1.22" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/template-standings.js?v=1.22" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCController.js?v=1.22" type="text/javascript"></script>
+<script src="https://scores.iplt20.com/ipl/mc/smMCService.js?v=1.22" type="text/javascript"></script>
+<script src="https://www.iplt20.com/assets/js/points.js?v=1.22" type="text/javascript"></script>
+</body>
+</html>
 {% endblock %}

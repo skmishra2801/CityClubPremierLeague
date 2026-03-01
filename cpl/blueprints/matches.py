@@ -9,29 +9,73 @@ from extensions import db
 bp = Blueprint("matches", __name__)
 
 
+# @bp.route("/")
+# def fixtures():
+#     selected_year = request.form.get("year") or request.args.get("year")
+#
+#     seasons = Season.query.order_by(Season.year.desc()).all()
+#     years = [s.year for s in seasons]
+#
+#     if not selected_year:
+#         latest_season = seasons[0] if seasons else None
+#         selected_year = latest_season.year if latest_season else None
+#
+#     #season_obj = Season.query.filter_by(year=int(selected_year)).first() if selected_year else None
+#     upcoming_matches = Match.query.filter(Match.status.in_(["Scheduled", "Live"])) \
+#                                   .order_by(Match.match_date.asc()).all()
+#     completed_matches = (
+#         Match.query.filter(
+#             ~Match.status.in_(["Scheduled", "Live"]),  # status not Scheduled/Live
+#             Match.winner_id.isnot(None),  # winner_id not null
+#             Match.winner_id != 0  # winner_id not 0
+#         )
+#         .order_by(Match.match_date.desc())
+#         .all()
+#     )
+#
+#     # Build a dict of teams keyed by ID
+#     teams = {t.id: t for t in Team.query.all()}
+#
+#     return render_template("matches/fixtures.html",
+#                            upcoming_matches=upcoming_matches,
+#                            completed_matches=completed_matches,
+#                            teams=teams,
+#                            years=years,)
+
+
 @bp.route("/")
 def fixtures():
-    upcoming_matches = Match.query.filter(Match.status.in_(["Scheduled", "Live"])) \
-                                  .order_by(Match.match_date.asc()).all()
-    completed_matches = (
-        Match.query.filter(
-            ~Match.status.in_(["Scheduled", "Live"]),  # status not Scheduled/Live
-            Match.winner_id.isnot(None),  # winner_id not null
-            Match.winner_id != 0  # winner_id not 0
-        )
+    selected_year = request.args.get("year")
+
+    seasons = Season.query.order_by(Season.year.desc()).all()
+    years = [s.year for s in seasons]
+
+    if not selected_year:
+        selected_year = seasons[0].year if seasons else None
+
+    season_obj = (
+        Season.query.filter_by(year=int(selected_year)).first()
+        if selected_year else None
+    )
+
+    # 🔥 ALL matches – latest to oldest
+    matches = (
+        Match.query
+        .filter(Match.season_id == season_obj.id)
         .order_by(Match.match_date.desc())
         .all()
     )
 
-    # Build a dict of teams keyed by ID
     teams = {t.id: t for t in Team.query.all()}
 
-    return render_template("matches/fixtures.html",
-                           upcoming_matches=upcoming_matches,
-                           completed_matches=completed_matches,
-                           teams=teams)
-
-
+    return render_template(
+        "matches/fixtures.html",
+        matches=matches,
+        teams=teams,
+        years=years,
+        selected_year=selected_year,
+        active_tab='results'
+    )
 @bp.route("/results")
 def results():
     page = request.args.get("page", 1, type=int)

@@ -134,6 +134,7 @@ def points_table():
         seasons=season_ids,
         selected_season=selected_season_id,
         selected_year=selected_year,
-        years = years
+        years = years,
+        active_tab="points"
     )
 

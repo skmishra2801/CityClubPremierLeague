@@ -1,66 +1,114 @@
-{% extends "layouts/base.html" %}
-{% block title %}Match Detail{% endblock %}
+{% extends 'layouts/base.html' %}
+{% block title %}Details{% endblock %}
 {% block content %}
+<div id="bannerDiv">
+    <section
+            class="ap-match-start-wrp col-100 floatLft flexDisplay justifyCenter mcBriefScoreBox live__superover   Final"
+            ng-class="{'women' : (matchSummary.CompetitionID == 62 || matchSummary.CompetitionID == 71),'fixtureViewMS' : fixtureView}"
+            style="">
+        <div class="ap-match-innerwrp textCenter">
+            <div class="ap-teams-battle-wrp col-100 floatLft flexDisplay justifySpace alignCenter msScoringBlock ng-scope"
+                 ng-if="matchSummary.CurrentInnings &lt;= 2">
+                <div class="ap-team-result-stat flexDisplay justifySpace alignCentre flexWrap msLBlock">
+                    <div class="ap-team-logoName ap-mob-right-align">
+                        <div class="ap-team-res-logo mr-r">
+                            <span class="tLogo ng-scope" ng-if="isNotNull(matchSummary.HomeTeamLogo)"> <img
+                                    ng-src="https://scores.iplt20.com/ipl/teamlogos/NVAlbtIyB81740555172aFPMviEPyJ1710927747rcb.png"
+                                    onerror="this.src = basePath+'images/default-team-logo.png?v=1?v=5';"
+                                    alt="Royal Challengers Bengaluru"
+                                    src="https://scores.iplt20.com/ipl/teamlogos/NVAlbtIyB81740555172aFPMviEPyJ1710927747rcb.png"> </span>
+                        </div>
+                    </div>
+                    <div class="ap-team-res-cnt textRight ng-scope"
+                         ng-class="{'ap-match-lost1':matchSummary.IsMatchEnd == 1 &amp;&amp; matchSummary.WinningTeamID != matchSummary.FirstBattingTeamID}"
+                         ng-if="matchSummary.HomeTeamID == undefined || matchSummary.HomeTeamID == '' || matchSummary.HomeTeamID == matchSummary.FirstBattingTeamID">
+                        <div class="ap-total-runs ng-binding ng-scope"
+                             ng-if="matchSummary['1FallScore'] != '' &amp;&amp; matchSummary['1FallWickets'] != 10">
+                            190/9
+                        </div>
+                        <h3 class="ap-runs-overs ng-binding ng-scope" ng-if="matchSummary['1FallOvers'] != ''">20
+                            Overs</h3>
+                    </div>
+                </div>
+                <div class="live-matchInfo ng-scope"
+                     ng-if="matchSummary.Round == 'Final' || getMatchNumber(matchSummary.MatchID) == 'Final'">
+                    <div class="matchOrder mob-hide qa ng-binding ng-scope" ng-if="!fixtureView">Final</div>
+                    <div class="matchOrder fi"><img class="fin-txt"
+                                                    ng-src="https://ipl-stats-sports-mechanic.s3.ap-south-1.amazonaws.com/ipl/images/final-text.png?v=1"
+                                                    src="https://ipl-stats-sports-mechanic.s3.ap-south-1.amazonaws.com/ipl/images/final-text.png?v=1">
+                    </div>
+                    <div class="versusIcon  mob-show" ng-class="{'mob-show' : !fixtureView}"></div>
+                </div>
 
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h4 m-0">Match Detail</h1>
-  <a href="{{ url_for('matches.fixtures') }}" class="btn btn-secondary btn-sm">
-    ← Back to Fixtures
-  </a>
+                <div class="ap-team-result-stat flexDisplay justifySpace alignCentre flexWrap msRBlock">
+
+                    <div class="ap-team-res-cnt textLeft ng-scope ap-match-lost1"
+                         ng-class="{'ap-match-lost1':matchSummary.IsMatchEnd == 1 &amp;&amp; matchSummary.WinningTeamID != matchSummary.SecondBattingTeamID}"
+                         ng-if="(matchSummary.AwayTeamID == undefined || matchSummary.AwayTeamID == '' || matchSummary.AwayTeamID == matchSummary.SecondBattingTeamID)">
+
+                        <div class="ap-total-runs ng-binding ng-scope"
+                             ng-if="matchSummary['2FallScore'] != '' &amp;&amp; matchSummary['2FallWickets'] != 10">
+                            184/7
+                        </div>
+                        <h3 class="ap-runs-overs ng-binding ng-scope"
+                            ng-if="matchSummary['2FallOvers'] != ''">20
+                            Overs</h3></div>
+
+                    <div class="ap-team-logoName ap-mob-left-align">
+                        <div class="ap-team-res-logo mr-l"> <span class="tLogo ng-scope"
+                                                                  ng-if="isNotNull(matchSummary.AwayTeamLogo)"> <img
+                                ng-src="https://scores.iplt20.com/ipl/teamlogos/PBKS.png"
+                                onerror="this.src = basePath+'images/default-team-logo.png?v=1?v=5';"
+                                alt="Punjab Kings" src="https://scores.iplt20.com/ipl/teamlogos/PBKS.png"> </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3
+                    class="ap-match-place col-100 floatLft textCenter re ng-scope"
+                    ng-if="matchSummary.CurrentInnings &lt;= 2"><span class="matGround ng-binding"
+                                                                      ng-bind="matchSummary.GroundName">Narendra Modi Stadium, Ahmedabad</span>
+                <span
+                        class="ms-matchdate ng-binding" ng-bind="matchSummary.MatchDate">03 Jun 2025</span>
+                <span class="ms-matchtime ng-binding ng-scope"
+                      ng-if="curSeasonName &gt;= 2023">7:30 pm IST </span>
+            </h3>
+            <div id="miniscoreCard" class="postmatchcomments"
+                 ng-class="{'postmatchcomments':matchSummary.IsMatchEnd == 1}">
+                <div class="ms-matchComments ng-binding ng-scope" ng-if="matchSummary.Comments!=''"
+                     ng-bind="matchSummary.Comments">Royal Challengers Bengaluru Won by 6 Runs (Winners)
+                </div>
+                <div class="ms-matchComments ng-scope"
+                     ng-if="(matchSummary.IsSuperOver != '1' || matchSummary.T20LiteSuperOver == '1') &amp;&amp; matchSummary.IsMatchEnd == 1">
+                </div>
+                <div class="ap-match-refree col-100 floatLft flexDisplay justifyCenter flexColumn alignCenter">
+                    <div class="ap-refree-inner flexDisplay justifySpace flexWrap">
+                        <div class="ap-refree-name ap-w50 ng-scope"
+                             ng-if="matchSummary.Referee != undefined &amp;&amp; matchSummary.Referee!=''"><span
+                                class="ap-refree-span-light">Referee: </span> <span
+                                class="ap-refree-span-bold ng-binding">Javagal Srinath </span>
+                        </div>
+                        <div class="ap-refree-name ap-w50 ng-scope"
+                             ng-if="matchSummary.TossDetails != undefined &amp;&amp; matchSummary.TossDetails != ''"><span
+                                class="ap-refree-span-light">Toss: </span> <span class="ap-refree-span-bold ng-binding">Punjab Kings Won The Toss And Elected To Field </span>
+                        </div>
+                        <div class="ap-refree-name ap-w100 ng-scope"
+                             ng-if="(matchSummary.Umpire1Name!= undefined &amp;&amp; matchSummary.Umpire1Name!='' ) || (matchSummary.Umpire2Name!= undefined &amp;&amp; matchSummary.Umpire2Name!='') || (matchSummary.Umpire3Name!= undefined &amp;&amp; matchSummary.Umpire3Name!='')">
+                            <span class="ap-refree-span-light">Umpires: </span>
+                            <span
+                                    class="ap-refree-span-bold ng-binding ng-scope"
+                                    ng-if="matchSummary.Umpire1Name!= undefined &amp;&amp; matchSummary.Umpire1Name!=''">Nitin Menon </span>
+                            <span
+                                    class="ap-refree-span-bold ng-binding ng-scope"
+                                    ng-if="matchSummary.Umpire2Name!= undefined &amp;&amp; matchSummary.Umpire2Name!=''">, Madanagopal Jayaraman </span>
+                            <span
+                                    class="ap-refree-span-bold ng-binding ng-scope"
+                                    ng-if="matchSummary.Umpire3Name!= undefined &amp;&amp; matchSummary.Umpire3Name!=''">, Chris Gaffaney </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </section>
 </div>
-<div class="card">
-  <div class="card-body">
-    <h5 class="card-title text-white">
-      {% if teams %}
-      {{ teams[match.team_a_id].name }} vs {{ teams[match.team_b_id].name }}
-      {% else %}
-      Team {{ match.team_a_id }} vs Team {{ match.team_b_id }}
-      {% endif %}
-    </h5>
-    <p class="card-text text-white">
-      <strong>Venue:</strong> {{ match.venue or "TBD" }}<br>
-      <strong>Date:</strong> {{ match.match_date.strftime("%d %b %Y %I:%M %p") }}<br>
-      <strong>Status:</strong> {{ match.status }}<br>
-      {% if match.result %}
-      <strong class="text-white">Result:</strong> <span class="text-white"> {{ match.result }}</span><br>
-      {% endif %}
-      {% if match.score_summary %}
-      <strong>Score Summary:</strong> {{ match.score_summary }}
-      {% endif %}
-    </p>
-    <form action="{{ url_for('matches.complete_match', match_id=match.id) }}" method="POST" class="mt-3 text-white">
-      <div class="mb-2" >
-        <label class="form-label">Winner</label>
-        <select name="winner_team_id" class="form-select" required>
-          <option value="">-- Select Winner --</option>
-          <option value="{{ match.team_a_id }}">{{ match.team_a.name }}</option>
-          <option value="{{ match.team_b_id }}">{{ match.team_b.name }}</option>
-          <option value="tie">Tie</option>
-          <option value="nr">No Result</option>
-        </select>
-      </div>
-      <!-- Team A Score -->
-      <div class="mb-2">
-        <label class="form-label">{{ match.team_a.name }} Score</label>
-        <div class="input-group">
-          <input type="number" name="team_a_runs" class="form-control" placeholder="Runs" min="0" required>
-          <span class="input-group-text">/</span>
-          <input type="number" name="team_a_wickets" class="form-control" placeholder="Wickets" min="0" max="10" required>
-          <input type="text" name="team_a_overs" class="form-control" placeholder="Overs (e.g. 19.5)" required>
-        </div>
-      </div>
-      <!-- Team B Score -->
-      <div class="mb-2">
-        <label class="form-label">{{ match.team_b.name }} Score</label>
-        <div class="input-group">
-          <input type="number" name="team_b_runs" class="form-control" placeholder="Runs" min="0" required>
-          <span class="input-group-text">/</span>
-          <input type="number" name="team_b_wickets" class="form-control" placeholder="Wickets" min="0" max="10" required>
-          <input type="text" name="team_b_overs" class="form-control" placeholder="Overs (e.g. 20)" required>
-        </div>
-      </div>
-      <button type="submit" class="btn btn-success">Mark as Completed</button>
-    </form>
-  </div>
-</div>
+
 {% endblock %}

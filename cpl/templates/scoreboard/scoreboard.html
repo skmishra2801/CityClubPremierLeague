@@ -13,6 +13,13 @@
       background-color: #d32f2f;
       color: #fff;
     }
+    .player-photo {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* makes it round */
+  object-fit: cover;  /* keeps aspect ratio */
+}
+
     .form-grid {
       display: flex;
       flex-wrap: wrap;
@@ -185,8 +192,13 @@
                     <td>
                         <div class="ap-bats-score-name">
                             <a href="javascript:void(0);" class="">
-                                <img class="ng-scope" title="{{ item.player.name }}"
-                                     src="{{ item.player.photo_url or 'default-player.png' }}">
+                                <!--                                <img class="ng-scope" title="{{ item.player.name }}"-->
+                                <!--                                     src="{{ item.player.photo_url or 'default-player.png' }}">-->
+                                <img class="rounded-circle"
+                                     title="{{ item.player.name }}"
+                                     src="{{ item.player.photo_url or 'default-player.png' }}"
+                                     width="50" height="50">
+
                                 <span class="ng-binding">
                                     {{ item.player.name }}
                                     {% if item.player.id == match.current_on_strike_id %}
@@ -206,9 +218,9 @@
                     <td class="textCenter op5 ng-binding">{{ item.sixes }}</td>
                     <td class="textCenter op5 ng-binding">
                         {% if item.balls_faced %}
-                            {{ "%.2f"|format((item.batting_runs / item.balls_faced) * 100) }}
+                        {{ "%.2f"|format((item.batting_runs / item.balls_faced) * 100) }}
                         {% else %}
-                            0.00
+                        0.00
                         {% endif %}
                     </td>
                 </tr>
@@ -263,8 +275,14 @@
                     <td>
                         <div class="ap-bats-score-name">
                             <a href="javascript:void(0);" class="">
-                                <img class="ng-scope" title="{{ item.player.name }}" alt=""
-                                     src="{{ item.player.photo_url or 'default-player.png' }}">
+<!--                                <img class="ng-scope" title="{{ item.player.name }}" alt=""-->
+<!--                                     src="{{ item.player.photo_url or 'default-player.png' }}">-->
+                                <img class="rounded-circle"
+     title="{{ item.player.name }}"
+     alt="{{ item.player.name }}"
+     src="{{ item.player.photo_url or 'default-player.png' }}"
+     width="50" height="50">
+
                                 <span class="ng-binding"> {{ item.player.name }}</span>
                             </a>
                         </div>
@@ -275,9 +293,9 @@
                     <td class="textCenter op5 bowCItem ng-binding">{{ item.wickets_taken }}</td>
                     <td class="textCenter bowCItem ng-binding">
                         {% if item.overs_bowled and item.overs_bowled > 0 %}
-                            {{ "%.2f"|format(item.runs_conceded / (item.overs_bowled/6)) }}
+                        {{ "%.2f"|format(item.runs_conceded / (item.overs_bowled/6)) }}
                         {% else %}
-                            0.00
+                        0.00
                         {% endif %}
                     </td>
                 </tr>
@@ -438,7 +456,8 @@
                             <span>
                                 {{ item.player.name }}
                                 {% if item.player.id == match.current_on_strike_id %}<span class="striker-star">★</span>{% endif %}
-                                {% if item.player.id == match.current_non_strike_id %}<span class="non-striker">(ns)</span>{% endif %}
+                                {% if item.player.id == match.current_non_strike_id %}<span
+                                    class="non-striker">(ns)</span>{% endif %}
                             </span>
                             <span class="dismissalSmall">{{ item.dismissal_desc or '' }}</span>
                         </div>
@@ -450,7 +469,7 @@
                     <td class="textCenter">{{ item.sixes }}</td>
                     <td class="textCenter">
                         {% if item.balls_faced %}
-                            {{ "%.2f"|format((item.batting_runs / item.balls_faced) * 100) }}
+                        {{ "%.2f"|format((item.batting_runs / item.balls_faced) * 100) }}
                         {% else %}0.00{% endif %}
                     </td>
                 </tr>
@@ -515,7 +534,7 @@
                     <td class="textCenter">{{ item.wickets_taken }}</td>
                     <td class="textCenter">
                         {% if item.overs_bowled and item.overs_bowled > 0 %}
-                            {{ "%.2f"|format(item.runs_conceded / item.overs_bowled) }}
+                        {{ "%.2f"|format(item.runs_conceded / item.overs_bowled) }}
                         {% else %}0.00{% endif %}
                     </td>
                 </tr>
@@ -607,92 +626,92 @@
     });
 </script>
 <script>
-  const matchId = {{ match.id }};   // from template context
-  const socket = io("/", { path: "/socket.io" }); // adjust path if needed
+    const matchId = {{ match.id }};   // from template context
+    const socket = io("/", { path: "/socket.io" }); // adjust path if needed
 
-  socket.on("connect", () => {
-    console.log("socket connected:", socket.id);
-    // ask server to join the match room
-    socket.emit("join_match", { match_id: matchId });
-  });
+    socket.on("connect", () => {
+      console.log("socket connected:", socket.id);
+      // ask server to join the match room
+      socket.emit("join_match", { match_id: matchId });
+    });
 
-  // Received when a new ball added
-  socket.on("ball_update", (payload) => {
-    // Basic sanity
-    if (!payload || payload.match_id !== matchId) return;
+    // Received when a new ball added
+    socket.on("ball_update", (payload) => {
+      // Basic sanity
+      if (!payload || payload.match_id !== matchId) return;
 
-    // Update scoreboard summary
-    const inn = payload.innings_no;
-    const summary = payload.summary;
-    // Example: update top-line score
-    const first = summary.first;
-    const second = summary.second;
-    document.querySelector("#first_score").textContent = `${first.score}/${first.wickets}`;
-    document.querySelector("#first_overs").textContent = first.overs;
-    document.querySelector("#second_score").textContent = `${second.score}/${second.wickets}`;
-    document.querySelector("#second_overs").textContent = second.overs;
+      // Update scoreboard summary
+      const inn = payload.innings_no;
+      const summary = payload.summary;
+      // Example: update top-line score
+      const first = summary.first;
+      const second = summary.second;
+      document.querySelector("#first_score").textContent = `${first.score}/${first.wickets}`;
+      document.querySelector("#first_overs").textContent = first.overs;
+      document.querySelector("#second_score").textContent = `${second.score}/${second.wickets}`;
+      document.querySelector("#second_overs").textContent = second.overs;
 
-    // Update batsman row (find by player_id)
-    const batsman = payload.match_scores.batsman;
-    const batsmanRow = document.querySelector(`#batsman_row_${batsman.player_id}`);
-    if (batsmanRow){
-      batsmanRow.querySelector(".runs").textContent = batsman.batting_runs;
-      batsmanRow.querySelector(".balls").textContent = batsman.balls_faced;
-      batsmanRow.querySelector(".fours").textContent = batsman.fours;
-      batsmanRow.querySelector(".sixes").textContent = batsman.sixes;
-      if (batsman.is_out) batsmanRow.classList.add("out");
-    } else {
-      // optionally insert new row if batsman didn't exist
-    }
-
-    // Update bowler row
-    const bowler = payload.match_scores.bowler;
-    const bowlerRow = document.querySelector(`#bowler_row_${bowler.player_id}`);
-    if (bowlerRow){
-      // convert overs_bowled_balls -> overs string
-      const balls = bowler.overs_bowled_balls || 0;
-      const overs = Math.floor(balls/6) + "." + (balls%6);
-      bowlerRow.querySelector(".overs").textContent = overs;
-      bowlerRow.querySelector(".runs_conceded").textContent = bowler.runs_conceded;
-      bowlerRow.querySelector(".wickets").textContent = bowler.wickets_taken;
-    }
-
-    // Update strike display
-    const on_strike = payload.players.on_strike;
-    const non_strike = payload.players.non_strike;
-    if (on_strike) document.querySelector("#on_strike_name").textContent = on_strike.name;
-    if (non_strike) document.querySelector("#non_strike_name").textContent = non_strike.name;
-    if (payload.players.current_bowler) document.querySelector("#current_bowler_name").textContent = payload.players.current_bowler.name;
-
-    // Update current over events UI (append the latest ball)
-    // You likely keep a #current_over list per innings
-    const ball = payload.ball;
-    if (ball){
-      const overList = document.querySelector("#current_over_list");
-      if (overList){
-        const li = document.createElement("li");
-        li.textContent = buildBallDesc(ball); // implement this helper
-        overList.appendChild(li);
+      // Update batsman row (find by player_id)
+      const batsman = payload.match_scores.batsman;
+      const batsmanRow = document.querySelector(`#batsman_row_${batsman.player_id}`);
+      if (batsmanRow){
+        batsmanRow.querySelector(".runs").textContent = batsman.batting_runs;
+        batsmanRow.querySelector(".balls").textContent = batsman.balls_faced;
+        batsmanRow.querySelector(".fours").textContent = batsman.fours;
+        batsmanRow.querySelector(".sixes").textContent = batsman.sixes;
+        if (batsman.is_out) batsmanRow.classList.add("out");
+      } else {
+        // optionally insert new row if batsman didn't exist
       }
-    }
 
-    // Optional: show toast that ball recorded successfully
-  });
+      // Update bowler row
+      const bowler = payload.match_scores.bowler;
+      const bowlerRow = document.querySelector(`#bowler_row_${bowler.player_id}`);
+      if (bowlerRow){
+        // convert overs_bowled_balls -> overs string
+        const balls = bowler.overs_bowled_balls || 0;
+        const overs = Math.floor(balls/6) + "." + (balls%6);
+        bowlerRow.querySelector(".overs").textContent = overs;
+        bowlerRow.querySelector(".runs_conceded").textContent = bowler.runs_conceded;
+        bowlerRow.querySelector(".wickets").textContent = bowler.wickets_taken;
+      }
 
-  // helper to convert ball payload to readable text
-  function buildBallDesc(ball){
-    if (!ball) return "";
-    if (ball.wicket) return "W";
-    const parts = [];
-    if (ball.extras){
-      if (ball.extras.wd) parts.push("Wd"+ball.extras.wd);
-      if (ball.extras.nb) parts.push("Nb"+ball.extras.nb + (ball.runs_bat ? "+"+ball.runs_bat : ""));
-      if (ball.extras.lb) parts.push("LB"+ball.extras.lb);
-      if (ball.extras.b) parts.push("B"+ball.extras.b);
+      // Update strike display
+      const on_strike = payload.players.on_strike;
+      const non_strike = payload.players.non_strike;
+      if (on_strike) document.querySelector("#on_strike_name").textContent = on_strike.name;
+      if (non_strike) document.querySelector("#non_strike_name").textContent = non_strike.name;
+      if (payload.players.current_bowler) document.querySelector("#current_bowler_name").textContent = payload.players.current_bowler.name;
+
+      // Update current over events UI (append the latest ball)
+      // You likely keep a #current_over list per innings
+      const ball = payload.ball;
+      if (ball){
+        const overList = document.querySelector("#current_over_list");
+        if (overList){
+          const li = document.createElement("li");
+          li.textContent = buildBallDesc(ball); // implement this helper
+          overList.appendChild(li);
+        }
+      }
+
+      // Optional: show toast that ball recorded successfully
+    });
+
+    // helper to convert ball payload to readable text
+    function buildBallDesc(ball){
+      if (!ball) return "";
+      if (ball.wicket) return "W";
+      const parts = [];
+      if (ball.extras){
+        if (ball.extras.wd) parts.push("Wd"+ball.extras.wd);
+        if (ball.extras.nb) parts.push("Nb"+ball.extras.nb + (ball.runs_bat ? "+"+ball.runs_bat : ""));
+        if (ball.extras.lb) parts.push("LB"+ball.extras.lb);
+        if (ball.extras.b) parts.push("B"+ball.extras.b);
+      }
+      if (ball.runs_bat && !(ball.extras && ball.extras.nb)) parts.push(ball.runs_bat);
+      return parts.join("+") || "0";
     }
-    if (ball.runs_bat && !(ball.extras && ball.extras.nb)) parts.push(ball.runs_bat);
-    return parts.join("+") || "0";
-  }
 </script>
 
 {% endblock %}

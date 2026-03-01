@@ -1,66 +1,231 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    body {
-      padding-top: 100px; /* offset for fixed navbar + button */
-    }
-    .fixed-add-btn {
-      position: fixed;
-      top: 70px; /* adjust based on navbar height */
-      right: 20px;
-      z-index: 1030; /* keep above table */
-    }
-</style>
 {% extends "layouts/base.html" %}
 {% block title %}Teams{% endblock %}
 {% block content %}
+<style>
+    .custom-select {
+        width: 150px;       /* make it smaller */
+        display: inline-block;
+    }
+    .season-select {
+        background: transparent;       /* no default gray background */
+        color: #fff;                   /* white text */
+        border: 2px solid #fff;        /* white border */
+        border-radius: 6px;            /* rounded corners */
+        padding: 6px 12px;             /* compact size */
+        font-weight: 600;
+        width: auto;                   /* shrink to fit content */
+        display: inline-block;
+        appearance: none;              /* remove default browser arrow */
+        background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='16' viewBox='0 0 24 24' width='16'><path d='M7 10l5 5 5-5z'/></svg>");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 16px;
+        padding-right: 30px;           /* space for arrow */
+        margin-top: 20px;
+    }
+    .season-select option {
+        background: #000;              /* dark dropdown background */
+        color: #fff;                   /* white text inside options */
+    }
+    .vn-teamsInnerWrp {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+   .vn-teamsInnerWrp li {
+        display: inline-block;      /* makes them sit side by side */
+        margin: 0 15px;             /* spacing between teams */
+        vertical-align: top;
+   }
+   .team-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid white;;
+        background: pink;
+        border-radius: 20px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
+        margin: 10px;
+   }
+   .team-card:hover {
+     transform: translateY(-5px);
+   }
+   .team-logo-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid #fff;
+        margin: 0 auto;
+   }
+   .team-logo-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+   }
+   .team-name {
+        color: #fff; /* adjust for background */
+        font-weight: 600;
+   }
+   .team-hover-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+   }
+   .team-card:hover .team-hover-overlay {
+        opacity: 1;
+   }
+   .team-hover-overlay img {
+        width: 60px;
+        margin-bottom: 10px;
+   }
+   .trophy-text {
+        color: #fff;
+        font-weight: 500;
+   }
+    /* Navigation bar always on top */
+    .ap-main-header {
+        position: relative;
+        z-index: 9999;
+    }
+    /* Year links clickable */
+    .year-auction li a {
+      position: relative;
+      z-index: 10000;
+      pointer-events: auto;
+      cursor: pointer;
+    }
 
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="h4 m-0">Teams</h1>
-    <a href="{{ url_for('teams.add_team') }}" class="btn btn-primary btn-sm fixed-add-btn">
-        + Add Team
-    </a>
-</div>
+    /* Lower background sections so they don’t overlap */
+    .teams-header-bg,
+    .teams-tata-logo,
+    .bottom-section-main {
+      position: relative;
+      z-index: 1;
+    }
 
-<form method="get" class="mb-3">
-    <label class="form-label text-white fw-bold">Select Season</label>
-    <select name="year" class="form-select bg-dark text-white" onchange="this.form.submit()">
-        {% for y in years %}
-        <option value="{{ y }}" {% if y== selected_year %}selected{% endif %}>{{ y }}</option>
-        {% endfor %}
-    </select>
-</form>
+    /* If logo overlaps, let clicks pass through */
+    .teams-tata-logo {
+      pointer-events: none;
+    }
 
-<!--<div class="row row-cols-1 row-cols-md-3 g-4">-->
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">
+</style>
+<div ng-app="MyApp">
+    <script defer src="https://www.iplt20.com/assets/js/ipl-custom.min.js?v=1.20"></script>
+    <div class="ap-main-header col-100 floatLft flexDisplay justifyCenter auction-session-bottom-line mb-0 py-1"
+         style="z-index:9999;">
+        <ul class="year-auction nav">
+            {% for year in years %}
+            <li class="{% if year == selected_year %}active{% endif %}">
+                <a class="{% if year == selected_year %}active show{% endif %}"
+                   href="{{ url_for('teams.list_teams', year=year) }}">
+                    {{ year }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <style>
+        .big-play-show{
+            display: block!important;
+        }
+    </style>
+    <div class="clearfix"></div>
+    <!--navigation menu end-->
+    <div class="bottom-section-main w-100 teams-card-bg" style="background-color:#071026">
+        <div class="teams-header-bg w-100 position-relative pull-right text-left">
+            <div class="d-flex justify-content-end mb-3">
+                <a href="{{ url_for('teams.add_team') }}" class="btn btn-light btn-sm add-team-btn">
+                    + Add Team
+                </a>
+            </div>
+            <div class="teams-tata-logo">
+                <img src="https://res.cloudinary.com/dni3icbrx/image/upload/v1770391605/CITY_CLUB_PREMIER_LEAGUE_ghdksl.png"
+                     alt="">
+            </div>
+            <div class="teams-text-img">TEAMS</div>
+        </div>
+        {% if teams %}
+        {% for team in teams %}
+        <div class="col">
+            <div class="card h-100 team-card">
+                <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="team-link">
+                    <div class="team-logo-wrap text-center">
+                        {% if team.team_picture_url %}
+                        <div class="team-logo-circle">
+                            <img src="{{ team.team_picture_url }}" alt="{{ team.name }}">
+                        </div>
+                        {% endif %}
+                        <h5 class="team-name mt-3">{{ team.name }}</h5>
+                    </div>
 
-    {% if teams %}
-    {% for team in teams %}
-    <div class="col">
-        <div class="card h-100">
-            {% if team.team_picture_url %}
-            <img src="{{ team.team_picture_url }}" class="card-img-top" alt="{{ team.name }}">
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ team.name }}</h5>
-                <p class="card-text mb-2">
-                    <strong>Code:</strong> {{ team.short_code or "N/A" }}<br>
-                    <strong>City:</strong> {{ team.city or "N/A" }}<br>
-                    <strong>Coach:</strong> {{ team.coach or "N/A" }}
-                </p>
-                <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="btn btn-outline-secondary btn-sm">
-                    View Team
+
+
+                    <!-- Trophy hover overlay -->
+                    <div class="team-hover-overlay">
+                        <img src="https://www.iplt20.com/assets/images/teams-trophy-new.png" alt="Trophy">
+                        <div class="trophy-text"></div>
+                    </div>
                 </a>
             </div>
         </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <div class="col-12">
-        <div class="alert alert-info">
-            No teams found. Click "Add Team" to create one.
+        {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No teams found. Click "Add Team" to create one.
+            </div>
         </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
+
+</div>
+
+<script>
+    $(document).ready(function(){
+        $(".SMbriefScoreWidget").hide();
+        $(".ap-copy").css("paddingBottom","15px");
+
+        function isCookieSet() {
+          // Replace 'your_cookie_name' with the actual name of your session cookie
+          return document.cookie.indexOf('username') !== -1;
+        }
+
+        if (!isCookieSet()) {
+            // Cookie is not set, hide the content
+            $('.cookie').removeClass('d-none');
+          }else{
+            $('.cookie').addClass('d-none');
+          }
+     })
+</script>
+
+
+<script>
+    $('.playoff_dd').change(function(){
+        $.ajax({
+            url: "/getBracketFixture?year="+$('.playoff_dd').val(),
+            type: "GET",
+            success: function (response) {
+                if (response.status) {
+                    $(".brackets-inside").html(response.html);
+                }
+            },
+            error: function (response) { }
+        })
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js"
+        integrity="sha512-q583ppKrCRc7N5O0n2nzUiJ+suUv7Et1JGels4bXOaMFQcamPk9HjdUknZuuFjBNs7tsMuadge5k9RzdmO+1GQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+
 
 {% endblock %}

@@ -3,22 +3,58 @@
 
 {% block content %}
 <!--<body style="background:#111; color:white; font-family:Arial; padding:20px;">-->
+<style>
+    body {
+  background: url('/static/images/stadium-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+}
+.card {
+  background: rgba(0,0,0,0.7);
+  border-radius: 10px;
+}
 
-<h1>Match Toss</h1>
-<p>{{ team_a }} vs {{ team_b }}</p>
+</style>
+<div class="container mt-4">
+  <div class="card shadow-lg">
+    <div class="card-header bg-dark text-white">
+      <h3>Match Toss</h3>
+    </div>
+    <div class="card-body">
+      <p class="lead text-white">{{ team_a }} vs {{ team_b }}</p>
 
-<form method="POST" action="{{ url_for('scoreboard.submit_toss') }}" style="margin-top:20px;">
-    <input type="hidden" name="match_id" value="{{ match.id }}">
+      <form method="POST" action="{{ url_for('scoreboard.submit_toss') }}">
+        <input type="hidden" name="match_id" value="{{ match.id }}">
 
-    <label><strong>Toss Winner:</strong></label><br>
-    <input type="radio" name="toss_winner" value="{{ team_a }}" required> {{ team_a }}<br>
-    <input type="radio" name="toss_winner" value="{{ team_b }}" required> {{ team_b }}<br><br>
+        <div class="mb-3">
+          <label class="form-label text-white"><strong>Toss Winner:</strong></label>
+          <div class="form-check text-white">
+            <input class="form-check-input" type="radio" name="toss_winner" value="{{ team_a }}" required>
+            <label class="form-check-label">{{ team_a }}</label>
+          </div>
+          <div class="form-check text-white">
+            <input class="form-check-input" type="radio" name="toss_winner" value="{{ team_b }}" required>
+            <label class="form-check-label">{{ team_b }}</label>
+          </div>
+        </div>
 
-    <label><strong>Decision:</strong></label><br>
-    <input type="radio" name="decision" value="bat" required> Bat First<br>
-    <input type="radio" name="decision" value="bowl" required> Bowl First<br><br>
+        <div class="mb-3">
+          <label class="form-label text-white"><strong>Decision:</strong></label>
+          <div class="form-check text-white">
+            <input class="form-check-input" type="radio" name="decision" value="bat" required>
+            <label class="form-check-label">Bat First</label>
+          </div>
+          <div class="form-check text-white">
+            <input class="form-check-input" type="radio" name="decision" value="bowl" required>
+            <label class="form-check-label">Bowl First</label>
+          </div>
+        </div>
 
-    <button class="btn btn-primary">Submit Toss</button>
-</form>
+        <button class="btn btn-primary w-100">Submit Toss</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}

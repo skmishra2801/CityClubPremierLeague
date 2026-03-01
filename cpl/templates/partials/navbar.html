@@ -1,81 +1,153 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-    body {
-        padding-top: 70px; /* offset for fixed navbar height */
+<!DOCTYPE html>
+<html lang="en">
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<!--    <title id="page_title" data-page-title="CPL T10 | City Club Premier League Official Website">CPL T10 | City Club Premier-->
+<!--        League Official Website</title>-->
+    <link rel="canonical" href="{{ url_for('main.home') }}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=3.0">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+<!--    <meta name="csrf-token" content="NDVBz6GzbMoDW4kBejlsEsBAXdGX7BFfUEGY4pXA">-->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#19398a">
+    <meta name="og:type" content="website">
+    <meta name="og:url" content="{{ url_for('main.home') }}">
+    <meta property='og:title' content="CPL | City Club Premier League Official Website">
+    <meta property='og:description'
+          content="The official CPL website with live scores, match updates, team rankings, all the latest news, and videos . Follow your favorite teams and players!">
+
+    <link rel="preload" onload="this.onload=null;this.rel='stylesheet'" as="style"
+          href="https://www.iplt20.com/assets/css/bootstrap-5.3.3.min.css?v=1.20">
+    <noscript>
+        <link rel="stylesheet" href="https://www.iplt20.com/assets/css/bootstrap-5.3.3.min.css?v=1.20">
+    </noscript>
+
+
+<!--    <link rel="preload" href="https://brightcove.iplt20.com/output/input/6386559747112-1766040643.jpg" as="image">-->
+<!--    <link rel="preload" href="https://brightcove.iplt20.com/output/input/6386559832112-1766127221.jpg" as="image">-->
+<!--    <link rel="preload" href="https://brightcove.iplt20.com/output/input/6386596812112-1765973110.jpg" as="image">-->
+<!--    <link rel="preload" href="https://brightcove.iplt20.com/output/input/6386636936112-1766043632.jpg" as="image">-->
+<!--    <link rel="preload" href="https://brightcove.iplt20.com/output/input/6386631234112-1766031631.jpg" as="image">-->
+<!--    <link rel="preload" href="https://brightcove.iplt20.com/output/input/6386595035112-1765965910.jpg" as="image">-->
+    <link rel="stylesheet" href="https://www.iplt20.com/assets/css/ipl-style.min.css?v=1.20">
+
+    <link rel="preload" onload="this.onload=null;this.rel='stylesheet'" as="style"
+          href="https://www.iplt20.com/assets/css/font-awesome.min.css?v=1.20">
+    <noscript>
+        <link rel="stylesheet" href="https://www.iplt20.com/assets/css/font-awesome.min.css?v=1.20?v=1.20">
+    </noscript>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" defer></script>
+
+
+    <style>
+        html, body{
+        overflow-x: hidden;
+        height: 100%;
     }
-    .navbar-brand img {
-        height: 40px;
-        margin-right: 10px;
-    }
-    .navbar {
-        background: linear-gradient(90deg, #0d6efd, #6610f2);
-    }
-    .navbar .nav-link {
-        color: #fff !important;
-        font-weight: 500;
-        margin-left: 15px;
-    }
-    .navbar .nav-link:hover {
-        color: #ffc107 !important;
-    }
-</style>
+    </style>
 
-<nav class="navbar navbar-expand-lg fixed-top">
-    <div class="container-fluid">
-        <!-- Brand/Logo -->
-        <a class="navbar-brand d-flex align-items-center text-white" href="{{ url_for('main.home') }}">
-            <img src="{{ url_for('static', filename='image/CPL Logo.png') }}" alt="Logo">
-            <span>City Club Premier League</span>
-        </a>
+</head>
+<body>
+<div class="ap-main-header left right col-100 floatLft flexDisplay justifySpace alignCenter flxNav" id="myHeader">
+    <div class="container-fluid container-xl d-flex justify-content-between flex-wrap position-relative p-0">
+        <div class="ap-ipl-logo"><a href="{{ url_for('main.home') }}"><img width="166" height="83" class="lazy"
+                                                                       src="https://res.cloudinary.com/dni3icbrx/image/upload/v1770391605/CITY_CLUB_PREMIER_LEAGUE_ghdksl.png"
+                                                                       aria-label="cpl-logo" alt=""></a></div>
 
-        <!-- Toggler for mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
 
-        <!-- Navbar links -->
-        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-            <ul class="navbar-nav">
+        <div class="site-mobile-menu site-navbar-target">
+            <div class="site-mobile-menu-header xxxxxxxxxxx">
+                <a href="{{ url_for('main.home') }}" class="mt-3"><img width="166" height="83"
+                                                                   src="https://res.cloudinary.com/dni3icbrx/image/upload/v1770391605/CITY_CLUB_PREMIER_LEAGUE_ghdksl.png"
+                                                                   aria-label="ipl-logo-new-old" alt=""></a>
+                <div class="site-mobile-menu-close mt-3">
+                    <span class="icon-close2 js-menu-toggle">×</span>
+                </div>
+            </div>
+            <div class="site-mobile-menu-body">
+            </div>
+        </div> <!-- .site-mobile-menu -->
 
-                <!-- Public links -->
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('players.list_players') }}">Players</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('auction.auction_page') }}">Auction</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('matches.fixtures') }}">Fixtures</a></li>
-<!--                <li class="nav-item"><a class="nav-link" href="{{ url_for('matches.results') }}">Results</a></li>-->
-<!--                <li class="nav-item"><a class="nav-link" href="{{ url_for('stats.points_table') }}">Points Table</a></li>-->
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('teams.list_teams') }}">Teams</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('scoreboard.scoreboard_page') }}">Scoreboard</a></li>
+        <div class="site-navbar-wrap">
+            <div class="site-navbar site-navbar-target d-flex align-items-center">
+                <div class="align-items-center">
+                    <nav class="site-navigation text-center">
+                        <ul class="site-menu main-menu js-clone-nav d-none d-lg-block textCenter">
+                            <li class="  has-children">
+                                <a onclick="click_menu(this)" data-event_context="header" data-element_text="MATCHES"
+                                   href="{{ url_for('players.add_player') }}" data-slug="matches/results">REGISTER</a>
+                            </li>
+                            <li class="  has-children">
+                                <a onclick="click_menu(this)" data-event_context="header" data-element_text="MATCHES"
+                                   href="{{ url_for('matches.fixtures') }}" data-slug="matches/results">MATCHES</a>
+                            </li>
+                            <li class="  has-children">
+                                <a onclick="click_menu(this)" data-event_context="header"
+                                   data-element_text="POINTS TABLE" href="{{ url_for('stats.points_table') }}"
+                                   data-slug="points-table/men">POINTS TABLE</a>
+                            </li>
 
-                <!-- Admin-only buttons -->
-                {% if session.get('is_admin') %}
-                    <li class="nav-item ms-2">
-                        <a href="{{ url_for('teams.init_balances') }}" class="btn btn-warning">
-                            Initialize Team Balances
-                        </a>
-                    </li>
+                            <li class="  has-children">
+                                <a onclick="click_menu(this)" data-event_context="header" data-element_text="TEAMS"
+                                   href="{{ url_for('teams.list_teams') }}" data-slug="teams">TEAMS</a>
+                            </li>
 
-                    <li class="nav-item ms-3">
-                        <a class="nav-link text-warning fw-bold" href="{{ url_for('admin.login') }}">
-                            Admin Panel
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link text-danger fw-bold" href="{{ url_for('admin.logout') }}">
-                            Logout
-                        </a>
-                    </li>
-                {% else %}
-                    <!-- Admin login button -->
-                    <li class="nav-item ms-3">
-                        <a class="nav-link text-info fw-bold" href="{{ url_for('admin.login') }}">
-                            Admin Login
-                        </a>
-                    </li>
-                {% endif %}
-            </ul>
+                            <li class="  has-children">
+                                <a onclick="click_menu(this)" data-event_context="header" data-element_text="STATS"
+                                   href="javascript:void(0)" data-slug="stats">STATS</a>
+                                <ul class="dropdown arrow-top">
+                                    <li class=" stats/2025 sub_menu">
+                                        <a onclick="click_menu(this)" data-event_context="header"
+                                           data-element_text="OVERALL STATS" href="#"
+                                           data-url="stats/2025" data-slug="stats/2025">OVERALL STATS</a>
+                                    </li>
+                                    <li class=" comparison sub_menu">
+                                        <a onclick="click_menu(this)" data-event_context="header"
+                                           data-element_text="HEAD TO HEAD" href="#"
+                                           data-url="comparison" data-slug="comparison">HEAD TO HEAD</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="active  has-children">
+                                <a onclick="click_menu(this)" data-event_context="header" data-element_text="AUCTION"
+                                   href="{{ url_for('auction.auction_page') }}" data-slug="auction">AUCTION</a>
+                            </li>
+                            <li class="  has-children">
+                                <a onclick="click_menu(this)" data-event_context="header" data-element_text="MORE"
+                                   href="javascript:void(0)" data-slug="more">MORE</a>
+                                <ul class="dropdown arrow-top">
+                                    <li class=" photos sub_menu">
+                                        <a onclick="click_menu(this)" data-event_context="header"
+                                           data-element_text="PHOTOS" href="#"
+                                           data-url="photos" data-slug="photos">PHOTOS</a>
+                                    </li>
+                                    <li class=" mobile-products sub_menu">
+                                        <a onclick="click_menu(this)" data-event_context="header"
+                                           data-element_text="MOBILE PRODUCTS"
+                                           href="#" data-url="mobile-products"
+                                           data-slug="mobile-products">MOBILE PRODUCTS</a>
+                                    </li>
+                                    <li class=" venues sub_menu">
+                                        <a onclick="click_menu(this)" data-event_context="header"
+                                           data-element_text="VENUES" href="#"
+                                           data-url="venues" data-slug="venues">VENUES</a>
+                                    </li>
+                                    <li class=" about/about-us sub_menu">
+                                        <a onclick="click_menu(this)" data-event_context="header"
+                                           data-element_text="ABOUT" href="#"
+                                           data-url="about/about-us" data-slug="about/about-us">ABOUT</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
     </div>
-</nav>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</div>

@@ -3,7 +3,7 @@ from cpl.blueprints.admin import admin_required
 from cpl.models import Player, Team, TeamBalance, Season, PlayerSeason, MatchScore
 from extensions import db
 from decimal import Decimal
-
+from sqlalchemy import func
 bp = Blueprint("auction", __name__, url_prefix="/auction")
 
 
@@ -28,6 +28,15 @@ def auction_page():
         sold_rows = PlayerSeason.query.filter_by(season_id=season_obj.id).all()
         sold_ids = {row.player_id for row in sold_rows}
         players = [p for p in all_players if p.id not in sold_ids]
+
+    if season_obj:
+        # Sold players for this season
+        sold_ids = db.session.query(PlayerSeason.player_id).filter_by(season_id=season_obj.id)
+
+        # Unsold players = all players not in sold_ids
+        unsold_players = Player.query.filter(~Player.id.in_(sold_ids)).all()
+    else:
+        unsold_players = []
 
     teams = {t.id: t for t in Team.query.all()}
 
@@ -117,6 +126,88 @@ def auction_page():
             flash(f"{player.name} sold to {teams[team_id].name} for {amount}!", "success")
             return redirect(url_for("auction.auction_page", year=selected_year))
 
+    most_expensive = None
+    if season_obj:
+        # Get the PlayerSeason row with the highest sold_price
+        most_expensive = (
+            PlayerSeason.query
+            .filter_by(season_id=season_obj.id)
+            .order_by(PlayerSeason.sold_price.desc()) .first()
+        )
+    # ───────────────────────────── # Auction stats # ─────────────────────────────
+    total_players = Player.query.count()
+    total_sold = 0
+    total_spent = 0
+    if season_obj:
+        total_sold = PlayerSeason.query.filter_by(season_id=season_obj.id).count()
+        total_spent = db.session.query(func.sum(PlayerSeason.sold_price))\
+                          .filter_by(season_id=season_obj.id).scalar() or 0
+
+    # ─────────────────────────────
+    # Team auction stats (Funds Remaining, Total Players)
+    # ─────────────────────────────
+    # Get distinct team_ids for this season
+    team_ids = db.session.query(PlayerSeason.team_id) \
+        .filter(PlayerSeason.season_id == season_obj.id,
+                PlayerSeason.team_id.isnot(None)) \
+        .distinct().all()
+
+    team_ids = [tid[0] for tid in team_ids]
+
+    teams_dict = Team.query.filter(Team.id.in_(team_ids)).all()
+
+    team_stats = {}
+    for team in teams_dict:
+        spent = db.session.query(func.sum(PlayerSeason.sold_price)) \
+                    .filter_by(season_id=season_obj.id, team_id=team.id) \
+                    .scalar() or 0
+
+        balance = TeamBalance.query.filter_by(team_id=team.id).first()
+        opening = 10000  # fallback if no balance row
+        remaining = opening - spent
+
+        total_players = PlayerSeason.query.filter_by(
+            season_id=season_obj.id,
+            team_id=team.id
+        ).count()
+
+        team_stats[team.id] = {
+            "remaining": remaining,
+            "total_players": total_players
+        }
+
+    # pass teams and team_stats into render_template
+    top_players = []
+    if season_obj:
+        top_players = (
+            db.session.query(PlayerSeason)
+            .filter_by(season_id=season_obj.id)
+            .order_by(PlayerSeason.sold_price.desc())
+            .limit(10)
+            .all()
+        )
+
+    if season_obj:
+        team_players = (
+            db.session.query(PlayerSeason)
+            .filter_by(season_id=season_obj.id)
+            .all()
+        )
+    else:
+        team_players = []
+
+    teamwise_players = {}
+    for ps in team_players:
+        team = teams.get(ps.team_id)
+        if not team:
+            continue
+        if team.id not in teamwise_players:
+            teamwise_players[team.id] = {
+                "team": team,
+                "players": []
+            }
+        teamwise_players[team.id]["players"].append(ps)
+
     # Render page
     return render_template(
         "auction/auction.html",
@@ -125,5 +216,14 @@ def auction_page():
         years=years,
         selected_year=int(selected_year) if selected_year else None,
         player_summaries=player_summaries,
+        most_expensive=most_expensive,
+        total_players=total_players,
+        total_sold=total_sold,
+        total_spent=total_spent,
+        team_stats=team_stats,
+        teams_dict=teams_dict,
+        top_players=top_players,
+        teamwise_players=teamwise_players,
+        unsold_players=unsold_players,
     )
 

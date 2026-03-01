@@ -1,181 +1,430 @@
 {% extends 'layouts/base.html' %}
-{% block title %}Auction{% endblock %}
-
+{% block title %}City Club Premier League{% endblock %}
 {% block content %}
-<div class="container my-4" xmlns="http://www.w3.org/1999/html">
+<style>
+    /* Auction Player Form Styling */
+.auction-form {
+  background: #f8f9fa;   /* light background */
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-    <h1 class="h5 mb-4">Player Auction</h1>
+.auction-form .form-label {
+  font-weight: 600;
+  color: #333;
+}
 
-    <!-- YEAR FILTER -->
-    <form method="get" class="mb-4">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label">Select Year</label>
-                <select name="year" class="form-select" onchange="this.form.submit()">
-                    <option value="">-- Choose Year --</option>
-                    {% for y in years %}
-                    <option value="{{ y }}" {% if selected_year== y %}selected{% endif %}>
-                        {{ y }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    </form>
+.auction-form .form-select,
+.auction-form .form-control {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
 
-    {% if selected_year %}
-    <!-- AUCTION FORM -->
-    <form method="post">
-        <div class="row g-3 align-items-end">
+.auction-form .btn-primary {
+  width: 100%;
+  font-weight: 600;
+  border-radius: 6px;
+}
 
-            <!-- Player selection -->
-            <div class="col-md-3">
-                <label class="form-label">Select Player</label>
-                <select name="player_id" id="playerSelect" class="form-select" required onchange="showPlayerInfo()">
-                    <option value="">-- Choose Player --</option>
-                    {% for p in players %}
-                    <option value="{{ p.id }}"
-                            data-photo="{{ p.photo_url }}"
-                            data-name="{{ p.name }}"
-                            data-role="{{ p.role }}"
-                            data-matches="{{ player_summaries[p.id].match_played }}"
-                            data-runs="{{ player_summaries[p.id].total_runs }}"
-                            data-runavg="{{ player_summaries[p.id].batting_avg or 'N/A' }}"
-                            data-sr="{{ player_summaries[p.id].strike_rate or 'N/A' }}"
-                            data-highest="{{ player_summaries[p.id].highest_score or 'N/A' }}"
-                            data-overs="{{ player_summaries[p.id].overs_bowled or 'N/A' }}"
-                            data-wickets="{{ player_summaries[p.id].wickets_taken or 'N/A' }}"
-                            data-bowlavg="{{ player_summaries[p.id].bowling_economy or 'N/A' }}">
-                        {{ p.name }} (ID: {{ p.id }})
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
+/* Align fields neatly */
+.auction-form .row.g-3 > div {
+  display: flex;
+  flex-direction: column;
+}
 
-            <!-- Team selection -->
-            <div class="col-md-3">
-                <label class="form-label">Sold To (Team)</label>
-                <select name="team_id" class="form-select" required>
-                    <option value="">-- Choose Team --</option>
-                    {% for t in teams.values() %}
-                    <option value="{{ t.id }}">{{ t.name }} ({{ t.short_code }})</option>
-                    {% endfor %}
-                </select>
-            </div>
+/* Ensure table rows and cells behave like a normal table */
+.auction-tbl {
+  border-collapse: collapse;
+  table-layout: fixed;   /* keeps consistent column widths */
+}
 
-            <!-- Amount -->
-            <div class="col-md-3">
-                <label class="form-label">Sold Amount</label>
-                <input type="number" step="0.01" name="amount" class="form-control" placeholder="Enter amount" required>
-            </div>
+.auction-tbl th,
+.auction-tbl td {
+  display: table-cell !important;  /* override any flex/inline-block */
+  vertical-align: middle;
+  padding: 8px 12px;
+  border: 1px solid #ddd;          /* optional, for clarity */
+}
 
-            <!-- Submit button -->
-            <div class="col-md-3 d-flex">
-                <button type="submit" class="btn btn-primary ms-auto">Submit</button>
-            </div>
-        </div>
-    </form>
+/* Fix Sr. No. column */
+.auction-tbl th:first-child,
+.auction-tbl td:first-child {
+  width: 60px;
+  text-align: center;
+}
 
-    <!-- PLAYER INFO CARDS -->
-    <div class="row mt-4" id="playerInfo" style="display:none;">
-        <!-- PHOTO CARD -->
-        <div class="col-md-6 d-flex justify-content-center">
-            <div class="card p-4" style="min-height:500px; width:500px;">
-                <img id="playerPhoto"
-                     src=""
-                     alt="Player Photo"
-                     class="rounded img-fluid"
-                     style="height:500px; width:500px; object-fit:cover;">
-            </div>
-        </div>
+/* Team column: logo + name spacing */
+.auction-tbl td:nth-child(2) img {
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.team-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* ensures spacing between logo and name */
+}
 
-        <!-- STAT CARD -->
-        <div class="col-md-6 d-flex justify-content-center">
-            <div class="card p-4 text-white fw-bold" style="min-height:500px; width:500px; background-color:#001f4d;">
-                <h4 id="statName" class="text-center mb-3"></h4><br>
-                <table style="font-size:18px;">
-                    <tr>
-                        <th>Role :</th>
-                        <td><span id="statRole"></span></td>
-                    </tr>
-                    <tr>
-                        <th>Innings :</th>
-                        <td><span id="statMatches"></span></td>
-                    </tr>
-                    <tr>
-                        <th>Runs :</th>
-                        <td><span id="statRuns"></span></td>
-                    </tr>
-                    <tr>
-                        <th>Avg/SR :</th>
-                        <td><span id="statRunAvg"></span>/<span id="statSR"></span></td>
-                    </tr>
-                    <tr>
-                        <th>Highest :</th>
-                        <td><span id="statHighest"></span></td>
-                    </tr>
-                    <tr>
-                        <th></th>
-                    </tr>
+.team-name {
+    font-weight: 500;
+    white-space: nowrap; /* prevents wrapping under the logo */
+}
 
-                    <tr>
-                        <th>Overs :</th>
-                        <td><span id="statOvers"></span></td>
-                    </tr>
-                    <tr>
-                        <th>Wickets :</th>
-                        <td><span id="statWickets"></span></td>
-                    </tr>
-                    <tr>
-                        <th>Economy :</th>
-                        <td><span id="statBowlAvg"></span></td>
-                    </tr>
-                </table>
+</style>
+<body>
+<div ng-app="MyApp">
+    <script defer src="https://www.iplt20.com/assets/js/ipl-custom.min.js?v=1.20"></script>
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PQ2QKF4"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
 
-
-            </div>
-        </div>
-
+    <div style="display: none;" class="loader-main">
+        <div class="loader"></div>
+    </div>
+    <script src="https://www.iplt20.com/assets/js/jQuery/jquery-3.6.min.js"></script>
+    <div class="ap-main-header col-100 floatLft flexDisplay justifyCenter auction-session-bottom-line mb-0 py-1"
+         style="z-index:99999;">
+        <ul class="year-auction nav">
+            {% for year in years %}
+            <li class="{% if year == selected_year %}active{% endif %}">
+                <a class="{% if year == selected_year %}active show{% endif %}"
+                   href="{{ url_for('auction.auction_page', year=year) }}">
+                    {{ year }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 
-    {% else %}
-    <p class="text-muted mt-4">Please select a year to load players.</p>
-    {% endif %}
+    <style>
+        .big-play-show{
+            display: block!important;
+        }
+    </style>
+    <div class="clearfix"></div>
+    <div class="tab-content new" header="show">
+        <div id="ya-2022" class="tab-pane fade in show active">
+            <div class="auction-details-new w-100">
 
+                <div class="new-auction-title">
+
+                    <h3>CPL {{ selected_year }}</span> Player Auction</h3>
+<!--                    <script> document.getElementById("year").textContent = new Date().getFullYear(); </script>-->
+                    <button class="bg-transparent border-0 ms-3 i" data-bs-toggle="modal"
+                            data-bs-target="#action-tooltip"><img src="https://www.iplt20.com/assets/images/i.svg"
+                                                                  alt="i con"></button>
+
+                </div>
+
+            </div>
+            <section class="auction-banner bg-2026">
+                <div class="container">
+                    <!-- <div class="row justify-content-center" style="display: none;"> -->
+                    <div class="row justify-content-center">
+                        <!--Player Auction-->
+                        <div class="col-lg-6 col-sm-12 position-relative" id="headVideoContainer">
+                            <form method="post" class="auction-form">
+                                <div class="row g-3">
+                                    <!-- Player selection -->
+                                    <div class="col-md-4">
+                                        <label class="form-label">Select Player</label>
+                                        <select name="player_id" id="playerSelect" class="form-select" required
+                                                onchange="showPlayerInfo()">
+                                            <option value="">-- Choose Player --</option>
+                                            {% for p in players %}
+                                            <option value="{{ p.id }}"
+                                                    data-photo="{{ p.photo_url }}"
+                                                    data-name="{{ p.name }}"
+                                                    data-role="{{ p.role }}"
+                                                    data-matches="{{ player_summaries[p.id].match_played }}"
+                                                    data-runs="{{ player_summaries[p.id].total_runs }}"
+                                                    data-runavg="{{ player_summaries[p.id].batting_avg or 'N/A' }}"
+                                                    data-sr="{{ player_summaries[p.id].strike_rate or 'N/A' }}"
+                                                    data-highest="{{ player_summaries[p.id].highest_score or 'N/A' }}"
+                                                    data-overs="{{ player_summaries[p.id].overs_bowled or 'N/A' }}"
+                                                    data-wickets="{{ player_summaries[p.id].wickets_taken or 'N/A' }}"
+                                                    data-bowlavg="{{ player_summaries[p.id].bowling_economy or 'N/A' }}">
+                                                {{ p.name }} (ID: {{ p.id }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <!-- Team selection -->
+                                    <div class="col-md-4">
+                                        <label class="form-label">Sold To (Team)</label>
+                                        <select name="team_id" class="form-select" required>
+                                            <option value="">-- Choose Team --</option>
+                                            {% for t in teams.values() %}
+                                            <option value="{{ t.id }}">{{ t.name }} ({{ t.short_code }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <!-- Amount -->
+                                    <div class="col-md-4">
+                                        <label class="form-label">Sold Amount</label>
+                                        <input type="number" step="0.01" name="amount" class="form-control"
+                                               placeholder="Enter amount" required>
+                                    </div>
+
+                                    <!-- Submit button -->
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+
+                        <!--Most Expenssive Player-->
+                        <div class="col-lg-6 col-sm-12" id="mostExpensivePlayer">
+                            <!-- Player Preview -->
+                            <div class="col-md-12 mt-3" id="playerPreview" style="display:none;">
+                                <div class="card p-3 text-center">
+                                    <img id="playerPhoto" src="" alt="Player Photo"
+                                         style="max-width:400px; width:100%; border-radius:12px; margin-bottom:15px; object-fit:cover;">
+                                    <h4 id="playerName" class="fw-bold"></h4>
+                                    <p id="playerRole" class="text-muted"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <section
+                                class="auction-tab-section auction-tabbed_panel ih-vbg-n ap-latest-news ap-no-bg-result col-100 floatLft relative">
+                            <div class="tab-n-view">
+                                <ul class="nav nav-tabs auction-tab">
+                                    <li class="active o"><a data-bs-toggle="tab" href="#autab1-2022" class="active show"
+                                                            id="Overview_click">Overview</a></li>
+                                    <li class="auction-tab-switch"><a data-bs-toggle="tab" href="#top-buys"
+                                                                      id="Top_Buys_click">Top Buys</a></li>
+                                    <li class="auction-tab-switch"><a data-bs-toggle="tab" href="#autab3-2022"
+                                                                      id="Sold_Players_click">Sold Players</a></li>
+                                    <li class="auction-tab-switch"><a data-bs-toggle="tab" href="#autab4-2022"
+                                                                      id="Unsold_Players_click">Unsold Players</a></li>
+                                    <li class="auction-tab-switch"><a data-bs-toggle="tab" href="#autab5-2022"
+                                                                      id="Video_click">Videos</a></li>
+                                </ul>
+                                <div class="grid-list-tab">
+                                    <a href="javascript:void(0)" class="au-grid active" id="au-grid"></a>
+                                    <a href="javascript:void(0)" class="au-list " id="au-list"></a>
+                                </div>
+                            </div>
+                            <div class="tab-content" id="update_auction_data">
+                                <!--Team Grid View-->
+                                <div id="autab1-2022" class="tab-pane fade in active show">
+                                    <!-- Grid View Start -->
+                                    <div class="auction-grid-view mt-3 overview-2026">
+                                        {% for t in teams_dict %}
+                                        <div class="agv-main {{ t.short_code }}" id="{{ t.short_code }}">
+                                            <div class="agv-team-logo">
+                                                <img src="{{ t.team_picture_url }}" alt="{{ t.name }}">
+                                            </div>
+                                            <div class="agv-team-name">{{ t.name }}</div>
+                                            <div class="avg-bottom">
+                                                <div class="avg-fund-remaining">
+                                                    <span class="fr-name">Funds Remaining</span>
+                                                    <span class="fr-fund">₹{{ "{:,}".format(team_stats[t.id].remaining) }}</span>
+                                                </div>
+                                                <ul class="mb-0 px-1">
+                                                    <li class="m-0">
+                                                        <span class="fr-name">Total</span>
+                                                        <span class="fr-fund">Players</span>
+                                                    </li>
+                                                    <li class="m-0 px-1">
+                                                        <span class="fr-name"></span>
+                                                        <span class="fr-fund">{{ team_stats[t.id].total_players }}</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+
+                                    </div>
+                                    <!-- Grid View End -->
+                                </div>
+                                <div id="autab2-2022" class="tab-pane fade">
+                                    <div style="text-align:center;">No data available</div>
+                                </div>
+                                <!--Team Grid View-->
+                                <!--Top Buys-->
+                                <div id="top-buys" class="tab-pane fade">
+                                    <div class="ih-points-table-sec">
+                                        <div class="ih-pt-bg">
+                                            <div class="ih-pt-tab-bg">
+                                                <div class="ih-pcard-sec">
+                                                    <div class="ih-pcard-wrap">
+                                                        <table class="ih-td-tab w-100 auction-tbl" id="t4">
+                                                            <thead>
+                                                            <tr class="ih-pt-tbl" style="display:revert">
+                                                                <th style="text-align: left;">Sr. No.</th>
+                                                                <th style="text-align: left;">Team</th>
+                                                                <th>Player</th>
+                                                                <th>Base Price</th>
+                                                                <th>Winning Bid</th>
+                                                                <th></th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="pointsdata">
+                                                            {% for ps in top_players %}
+                                                            <tr>
+                                                                <td class="ih-t-color">{{ loop.index }}</td>
+                                                                <td>
+                                                                    <div style="display:flex; align-items:center;">
+                                                                        <img src="{{ ps.team.team_picture_url }}"
+                                                                             width="40" height="40"
+                                                                             alt="{{ ps.team.name }}">
+                                                                        <!--                                                                        <span style="margin-left:8px;">{{ ps.team.name }}</span>-->
+                                                                    </div>
+                                                                </td>
+                                                                <td>{{ ps.player.name }}</td>
+                                                                <td class="rpSymbol">
+                                                                    {{ "{:,}".format(ps.player.base_price if
+                                                                    ps.player.base_price else 200) }}
+                                                                </td>
+                                                                <td>₹{{ "{:,}".format(ps.sold_price) }}</td>
+                                                                <td>
+                                                                    <div class="rtm_logo_col"></div>
+                                                                </td>
+                                                            </tr>
+
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--Top Buys-->
+                                <!--Sold Players-->
+                                <div id="autab3-2022" class="tab-pane fade">
+                                    <div class="col-md-12 text-center pt-2">
+                                        <div class="auc-round-logo">
+                                            {% for data in teamwise_players.values() %}
+                                            <section id="{{ data.team.short_code }}-inside"
+                                                     class="ih-points-table-sec position-relative">
+                                                <div class="{{ data.team.short_code }}-inside"
+                                                     style="position:absolute;top:-60px"></div>
+                                                <div class="ih-points-table-sec">
+                                                    <div class="ih-pt-bg">
+                                                        <div class="ih-pt-tab-bg">
+                                                            <div class="ih-titel">
+                                                                <div class="ih-t-left align-center">
+                                                                    <h2>
+                                                                        <img src="{{ data.team.team_picture_url }}"
+                                                                             alt="{{ data.team.name }}" width="50">
+                                                                        {{ data.team.name }}
+                                                                    </h2>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="ih-pcard-sec">
+                                                                <div class="ih-pcard-wrap">
+                                                                    <table class="ih-td-tab w-100 auction-tbl sold-players t3"
+                                                                           id="t3-{{ data.team.name|lower|replace(' ', '-') }}">
+                                                                        <thead>
+                                                                        <tr class="ih-pt-tbl" style="display:revert">
+                                                                            <th>Sr. No.</th>
+                                                                            <th>Player</th>
+                                                                            <th>Base Price</th>
+                                                                            <th>Winning Bid</th>
+                                                                            <th></th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                        {% for ps in data.players %}
+                                                                        <tr>
+                                                                            <td>{{ loop.index }}</td>
+                                                                            <td>{{ ps.player.name }}</td>
+                                                                            <td>₹{{ "{:,}".format(ps.player.base_price
+                                                                                or 200) }}
+                                                                            </td>
+                                                                            <td>₹{{ "{:,}".format(ps.sold_price) }}</td>
+                                                                            <td></td>
+                                                                        </tr>
+                                                                        {% endfor %}
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </section>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!---Sold Players End--->
+                                <!---Unsold Players--->
+                                <div id="autab4-2022" class="tab-pane fade">
+                                    <div class="ih-points-table-sec">
+                                        <div class="ih-pt-bg">
+                                            <div class="ih-pt-tab-bg">
+                                                <div class="ih-pcard-sec">
+                                                    <div class="ih-pcard-wrap">
+                                                        <table class="ih-td-tab w-100 auction-tbl" id="t5">
+                                                            <thead>
+                                                            <tr class="ih-pt-tbl" style="display:revert">
+                                                                <th class="skip-filter" style="text-align: left;">Sr.
+                                                                    No.
+                                                                </th>
+                                                                <th class="skip-filter" style="text-align: left;">
+                                                                    PLAYER
+                                                                </th>
+                                                                <th>BASE PRICE</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="pointsdata">
+                                                            {% for player in unsold_players %}
+                                                            <tr>
+                                                                <td>{{ loop.index }}</td>
+                                                                <td>{{ player.name }}</td>
+                                                                <td>₹{{ "{:,}".format(player.base_price or 200)
+                                                                    }}
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!---Unsold Players End--->
+
+                                                    </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 </div>
 
 <script>
+
     function showPlayerInfo() {
         const select = document.getElementById("playerSelect");
         const option = select.options[select.selectedIndex];
 
-        if (!option.value) {
-            document.getElementById("playerInfo").style.display = "none";
-            return;
+        if (option.value) {
+            document.getElementById("playerPhoto").src = option.dataset.photo || "";
+            document.getElementById("playerName").textContent = option.dataset.name || "";
+            document.getElementById("playerRole").textContent = option.dataset.role || "";
+            document.getElementById("playerPreview").style.display = "block";
+        } else {
+            document.getElementById("playerPreview").style.display = "none";
         }
-
-        // Show section
-        document.getElementById("playerInfo").style.display = "flex";
-
-        // PHOTO
-        const photo = option.getAttribute("data-photo");
-        document.getElementById("playerPhoto").src =
-            photo || "{{ url_for('static', filename='image/default-player.png') }}";
-
-        // DETAILS
-        document.getElementById("statName").textContent = option.getAttribute("data-name");
-        document.getElementById("statRole").textContent = option.getAttribute("data-role") || "Unknown";
-
-        document.getElementById("statMatches").textContent = option.getAttribute("data-matches");
-        document.getElementById("statRuns").textContent = option.getAttribute("data-runs");
-        document.getElementById("statRunAvg").textContent = option.getAttribute("data-runavg");
-        document.getElementById("statSR").textContent = option.getAttribute("data-sr");
-        document.getElementById("statHighest").textContent = option.getAttribute("data-highest");
-
-        document.getElementById("statOvers").textContent = option.getAttribute("data-overs");
-        document.getElementById("statWickets").textContent = option.getAttribute("data-wickets");
-        document.getElementById("statBowlAvg").textContent = option.getAttribute("data-bowlavg");
     }
 </script>
 
+</body>
 {% endblock %}

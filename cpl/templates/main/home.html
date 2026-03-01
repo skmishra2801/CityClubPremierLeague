@@ -1,238 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>City Club Premier League | Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        :root { --muted: #6c757d; }
+{% extends 'layouts/base.html' %}
+{% block title %}City Club Premier League{% endblock %}
+{% block content %}
+<style>
+    .story-tray-main {
+  width: 100%;              /* full width */
+  margin-top: 80px;         /* gap from top (adjust as needed) */
+  padding: 20px 0;          /* vertical padding */
+}
 
-        .teams-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-        }
+.story-trey {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;  /* center items across screen */
+  gap: 30px;                /* spacing between team blocks */
+}
 
-        .team-card {
-            background: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: inherit;
-        }
+.story-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #fff;
+  margin: 0 auto;
+}
 
-        .team-card .logo img {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-        }
+.story-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+    .what-r-u-text { color: #fff; /* pure white */ font-weight: 700; /* optional: make it bold */ text-align: center; /* optional: center align */ }
+</style>
+<div class="MyApp">
+    <section class="story-tray-main">
+        <div class="container-fluid">
+            <div class="story-control-title">
+                <h2>
+                    Good Evening!</h2>
+                <span>Curated shorts for you</span>
+            </div>
+            <div class="story-trey position-relative">
+                <ul onclick="click_tile(this)" data-title="DW" data-type="story"
+                    class="content storiesUl storiesPlayerpopup" id="storiesPlayerpopup_One1">
+                    <div class="story-circle">
+                        <img src="https://res.cloudinary.com/dni3icbrx/image/upload/v1767604049/mbspiiljibk1dsoim6tg.jpg"
+                             alt=""
+                             loading="lazy">
+                    </div>
+                    <h3 class="col-100 floatLft textCenter text-white mt-3">The Devansh Warriors</h3>
+                    <!-- internal story contents -->
+                    <li class="childli_1" mediaid="6386559916112" mediaidtitle="DW"></li>
+                    <li class="childli_2" mediaid="6386552029112" mediaidtitle="DW"></li>
+                    <li class="childli_3" mediaid="6386552311112" mediaidtitle="DW"></li>
+                    <!-- internal story contents -->
+                </ul>
+                <ul onclick="click_tile(this)" data-title="NL" data-type="story"
+                    class="content storiesUl storiesPlayerpopup" id="storiesPlayerpopup_One2">
+                    <div class="story-circle">
+                        <img src="https://res.cloudinary.com/dni3icbrx/image/upload/v1767535717/NSOLN_zm0g3h.png" alt=""
+                             loading="lazy">
+                    </div>
+                    <h3 class="col-100 floatLft textCenter text-white mt-3">NSOLN</h3>
+                    <!-- internal story contents -->
+                    <li class="childli_1" mediaid="6386560608112" mediaidtitle="NL"></li>
+                    <li class="childli_2" mediaid="6386551418112" mediaidtitle="NL"></li>
+                    <li class="childli_3" mediaid="6386546412112" mediaidtitle="NL"></li>
+                    <!-- internal story contents -->
+                </ul>
+                <ul onclick="click_tile(this)" data-title="VS" data-type="story"
+                    class="content storiesUl storiesPlayerpopup" id="storiesPlayerpopup_One3">
+                    <div class="story-circle">
+                        <img src="https://res.cloudinary.com/dni3icbrx/image/upload/v1767420428/ad5y2kwjdkmlzcrd7yns.png"
+                             alt=""
+                             loading="lazy">
+                    </div>
+                    <h3 class="col-100 floatLft textCenter text-white mt-3">Vision Shilpi</h3>
+                    <!-- internal story contents -->
+                    <li class="childli_1" mediaid="6386560830112" mediaidtitle="VS"></li>
+                    <li class="childli_2" mediaid="6386554151112" mediaidtitle="VS"></li>
+                    <!-- internal story contents -->
+                </ul>
+                <ul onclick="click_tile(this)" data-title="AH" data-type="story"
+                    class="content storiesUl storiesPlayerpopup" id="storiesPlayerpopup_One4">
+                    <div class="story-circle">
+                        <img src="https://res.cloudinary.com/dni3icbrx/image/upload/v1764606137/Aahan_new_hwddnq.png"
+                             alt=""
+                             loading="lazy">
+                    </div>
+                    <h3 class="col-100 floatLft textCenter text-white mt-3">Aahan</h3>
+                    <!-- internal story contents -->
+                    <li class="childli_1" mediaid="6386546519112" mediaidtitle="AH"></li>
+                    <li class="childli_2" mediaid="6386560026112" mediaidtitle="AH"></li>
+                    <li class="childli_3" mediaid="6386554858112" mediaidtitle="AH"></li>
+                    <li class="childli_4" mediaid="6386551376112" mediaidtitle="AH"></li>
+                    <li class="childli_5" mediaid="6386549045112" mediaidtitle="AH"></li>
+                    <li class="childli_6" mediaid="6386521428112" mediaidtitle="AH"></li>
+                    <!-- internal story contents -->
+                </ul>
+                <ul onclick="click_tile(this)" data-title="TS" data-type="story"
+                    class="content storiesUl storiesPlayerpopup" id="storiesPlayerpopup_One5">
+                    <div class="story-circle">
+                        <img src="https://res.cloudinary.com/dni3icbrx/image/upload/v1764485320/webahmneqazmzsgpagfj.png"
+                             alt=""
+                             loading="lazy">
+                    </div>
+                    <h3 class="col-100 floatLft textCenter text-white mt-3">Thunder Strikers</h3>
+                    <!-- internal story contents -->
+                    <li class="childli_1" mediaid="6386560040112" mediaidtitle="TS"></li>
+                    <!-- internal story contents -->
+                </ul>
+            </div>
+        </div>
+    </section>
 
-        .matches-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            font-family: 'Segoe UI', sans-serif;
-        }
-
-        .matches-table thead {
-            background-color: #007bff;
-            color: white;
-        }
-
-        .matches-table thead th {
-            padding: 12px;
-            text-align: left;
-            font-weight: bold;
-        }
-
-        .matches-table tbody td {
-            padding: 10px;
-            border-bottom: 1px solid #dee2e6;
-            background-color: #f9f9f9;
-        }
-
-        .matches-table tbody tr:hover td {
-            background-color: #eef6ff;
-        }
-
-        .blink-red {
-            color: red;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0% {opacity: 1;}
-            50% {opacity: 0;}
-            100% {opacity: 1;}
-        }
-    </style>
-</head>
-
-<body>
-
-{% include "partials/navbar.html" %}
-
-{% if is_admin %}
-<p class="blink-red text-center">Welcome Admin!</p>
-{% else %}
-<p class="blink-red text-center">Welcome Guest! Limited Access</p>
-{% endif %}
-<section class="container mt-4">
-    <form method="get" action="{{ url_for('main.home') }}" class="mb-3">
-        <label for="seasonSelect" class="form-label">Select Season:</label>
-        <select id="seasonSelect" name="year" class="form-select bg-dark text-white" onchange="this.form.submit()">
-            {% for season in seasons %}
-            <option value="{{ season.year }}" {% if selected_season and season.year== selected_season.year %}selected{%
-                    endif %}>
-                {{ season.year }}
-            </option>
-            {% endfor %}
-        </select>
-    </form>
-</section>
-<section class="container mt-4">
-    <div class="teams-grid">
-        {% for team in allteams %}
-        <a href="{{ url_for('teams.team_detail', team_id=team.id) }}" class="team-card">
-            <div class="logo">
-                <img src="{{ team.team_picture_url or url_for('static', filename='image/default.png') }}"
-                     alt="{{ team.name }}">
+    <div class="col-xxl-12 wru">
+        <h1 class="what-r-u-text w-100 wrul-align">What Are You Looking For?</h1>
+        <div class="what-r-u-btns">
+            <div>
+                <a onclick="click_cta(this)" data-event_context="What are you looking for?"
+                   data-element_text="Fixtures &amp; Results" href="{{ url_for('matches.fixtures') }}"><i></i>
+                    Fixtures &amp; Results</a>
+                <span></span>
             </div>
             <div>
-                <div style="font-weight:700">{{ team.name }}</div>
-                <div style="color:var(--muted);font-size:13px">{{ team.short_code }}</div>
+                <a onclick="click_cta(this)" data-event_context="What are you looking for?"
+                   data-element_text="Points Table" href="#"><i></i> Points Table</a>
+                <span></span>
             </div>
-        </a>
-        {% endfor %}
+            <div>
+                <a onclick="click_cta(this)" data-event_context="What are you looking for?"
+                   data-element_text="Overall Stats" href="#"><i></i> Overall Stats</a>
+                <span></span>
+            </div>
+            <div>
+                <a onclick="click_cta(this)" data-event_context="What are you looking for?"
+                   data-element_text="All Teams" href="{{ url_for('teams.list_teams') }}"><i></i> All Teams</a>
+                <span></span>
+            </div>
+        </div>
     </div>
-</section>
-
-
-<!-- AUCTION TABLE -->
-<section class="container mt-5">
-    <h2 class="mb-2 text-primary">Auction Details</h2>
-    <table class="matches-table">
-        <thead>
-        <tr>
-            <th>Team</th>
-            <th>Opening Balance</th>
-            <th>Spent Amount</th>
-            <th>Available Balance</th>
-            <th>Max Players</th>
-            <th>No. of Players</th>
-            <th>Risk Metric</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for team in team_summary %}
-        <tr>
-            <td>{{ team.team }}</td>
-            <td>{{ team.openingbalance }}</td>
-            <td>{{ team.spentamount }}</td>
-            <td {% if team.balance
-            <= 200 %}style="color:red;font-weight:bold"{% endif %}>
-            {{ team.balance }}
-            </td>
-            <td>{{ team.maxplayers }}</td>
-            <td>{{ team.players_bought }}</td>
-            <td {% if team.calculate is not none and team.calculate
-            < 200 %}style="color:red;font-weight:bold"{% endif %}>
-            {% if team.calculate %}
-            {{ "%.2f"|format(team.calculate) }}
-            {% else %}
-            0.00
-            {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</section>
-
-
-<!-- LEADERBOARD -->
-<section class="container mt-5">
-    <h2 class="mb-2 text-primary">Leader Board</h2>
-    <table class="matches-table">
-        <thead>
-        <tr>
-            <th scope="col">POS</th>
-            <th scope="col">TEAM</th>
-            <th scope="col">P</th>
-            <th scope="col">W</th>
-            <th scope="col">L</th>
-            <th scope="col">PTS</th>
-            <th scope="col">RECENT FORM</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for t in leaderboard %}
-        <tr>
-            <td>{{ t.POS }}</td>
-            <td class="fw-bold">{{ t.team }}</td>
-            <td>{{ t.P }}</td>
-            <td>{{ t.W }}</td>
-            <td>{{ t.L }}</td>
-            <td class="fw-bold">{{ t.PTS }}</td>
-            <td>
-                {% for result in t.recent_form.split() %}
-                <span class="badge
-                            {% if result == 'W' %} bg-success
-                            {% elif result == 'L' %} bg-danger
-                            {% else %} bg-secondary
-                            {% endif %}">
-                            {{ result }}
-                        </span>
-                {% endfor %}
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</section>
-
-
-<!-- LATEST MATCHES -->
-<!-- LATEST MATCHES -->
-<section class="container mt-5">
-    <h2 class="mb-2 text-primary">Latest Matches - {{ selected_season.year }}</h2>
-
-    <table class="matches-table">
-        <thead>
-        <tr>
-            <th>Match Title</th>
-            <th>Date</th>
-            <th>Venue</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for match in matches %}
-        <tr>
-            <td>
-
-                {{ match.team_a.name }} vs {{ match.team_b.name }}
-
-            </td>
-            <td>{{ match.match_date.strftime("%d-%m-%Y") }}</td>
-            <td>{{ match.venue }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</section>
-
-
-{% include "partials/footer.html" %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-</body>
-</html>
+</div>
+{% endblock %}
